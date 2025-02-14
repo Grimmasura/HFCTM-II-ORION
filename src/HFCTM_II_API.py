@@ -1,32 +1,24 @@
 from fastapi import FastAPI
-import numpy as np
-from hfctm_ii import HFCTMII
+from pydantic import BaseModel
+from typing import List
+import uvicorn
 
 app = FastAPI()
-hfctm = HFCTMII()
+
+# Define Request Model
+class PredictionInput(BaseModel):
+    sequence: List[float]
 
 @app.get("/")
-def read_root():
+def root():
     return {"message": "HFCTM-II API is running!"}
 
 @app.post("/predict/")
-def predict_adversarial_attack(sequence: list):
-    """Predict if an adversarial attack is occurring."""
-    prediction = hfctm.predict_adversarial_attack(sequence)
+def predict_adversarial_attack(data: PredictionInput):
+    """Predict if an adversarial attack is occurring based on the input sequence."""
+    # Replace this logic with your real prediction function
+    prediction = sum(data.sequence) > 0  # Dummy logic, replace with real model
     return {"adversarial_attack": bool(prediction)}
 
-@app.post("/stabilize/")
-def stabilize_knowledge_state(state: float, attack_predicted: bool):
-    """Apply recursive stabilization based on predicted adversarial attack."""
-    stabilized_state = hfctm.apply_recursive_stabilization(state, attack_predicted)
-    return {"stabilized_state": stabilized_state}
-
-@app.post("/wavelet_analysis/")
-def wavelet_analysis(sequence: list):
-    """Perform wavelet anomaly detection on a sequence of knowledge states."""
-    anomaly_matrix = hfctm.wavelet_anomaly_detection(np.array(sequence)).tolist()
-    return {"wavelet_transform": anomaly_matrix}
-
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
