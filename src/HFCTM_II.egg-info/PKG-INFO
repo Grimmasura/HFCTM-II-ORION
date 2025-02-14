@@ -1,0 +1,46 @@
+Metadata-Version: 2.2
+Name: HFCTM_II
+Version: 1.0
+Summary: A deployable package for HFCTM-II adversarial resilience and recursive stability.
+Home-page: https://github.com/Grimmasura/HFCTM-II_Egregore_Defense_AI_Security
+Author: GrimmSeraph
+Author-email: Joshuahumphrey@duck.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: scikit-learn
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: pydantic
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# HFCTM-II Egregore Defense
+### AI Resilience Against Cybersecurity Threats & Semantic Drift
+
+## Overview
+This repository implements the **Holographic Fractal Chiral Toroidal Model (HFCTM-II)** to enhance AI robustness against egregoric influence, semantic drift, and cybersecurity attacks.
+
+## Features
+- Recursive Fractal Redundancy
+- Chiral Inversion Mechanics
+- Ontological Stability Mechanisms
+- Adversarial AI Defense Systems
+
+## Installation
+```bash
+git clone https://github.com/YOUR_USERNAME/HFCTM-II_Egregore_Defense.git
+cd HFCTM-II_Egregore_Defense
+pip install -r requirements.txt
