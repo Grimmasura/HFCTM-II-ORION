@@ -11,9 +11,8 @@ This repository implements the **Holographic Fractal Chiral Toroidal Model (HFCT
 - Adversarial AI Defense Systems
 
 ## License
-
-This project is licensed under the [MIT License](LICENSE).
-
+This project is licensed under the [MIT License](LICENSE).  
+Copyright (c) 2024 HFCTM-II Research Group.
 
 ## Installation
 ```bash
