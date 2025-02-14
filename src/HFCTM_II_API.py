@@ -1,12 +1,17 @@
 from fastapi import FastAPI
 import numpy as np
-from hfctm_ii import HFCTMII
+from src.hfctm_ii import HFCTMII
 from pydantic import BaseModel
 from typing import List
 
 # Initialize API & Model
 app = FastAPI()
 model = HFCTMII()
+
+# 🚀 Train the model with sample data
+X_train = np.random.rand(100, 10)  # 100 samples, 10 features each
+y_train = np.random.randint(0, 2, 100)  # Binary labels (0 or 1)
+model.train_adversarial_detector(X_train, y_train)
 
 # Define Input Schema
 class AttackPredictionRequest(BaseModel):
