@@ -10,6 +10,11 @@ This repository implements the **Holographic Fractal Chiral Toroidal Model (HFCT
 - Ontological Stability Mechanisms
 - Adversarial AI Defense Systems
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+
 ## Installation
 ```bash
 git clone https://github.com/YOUR_USERNAME/HFCTM-II_Egregore_Defense.git
