@@ -9,9 +9,12 @@ app = FastAPI()
 model = HFCTMII()
 
 # 🚀 Train the model with sample data
-X_train = np.random.rand(100, 10)  # 100 samples, 10 features each
+
+# Train model with 5 features instead of 10
+X_train = np.random.rand(100, 5)  # 100 samples, 5 features each
 y_train = np.random.randint(0, 2, 100)  # Binary labels (0 or 1)
 model.train_adversarial_detector(X_train, y_train)
+
 
 # Define Input Schema
 class AttackPredictionRequest(BaseModel):
