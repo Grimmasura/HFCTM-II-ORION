@@ -8,10 +8,10 @@ from typing import List
 app = FastAPI()
 model = HFCTMII()
 
-# 🚀 Train the model with sample data
+# 🚀 Train the model with 5 features
 X_train = np.random.rand(100, 5)  # 100 samples, 5 features each
 y_train = np.random.randint(0, 2, 100)  # Binary labels (0 or 1)
-model.train_adversarial_detector(X_train, y_train)
+model.train_adversarial_detector(X_train, y_train)  # Train the model
 
 # Define Input Schema
 class AttackPredictionRequest(BaseModel):
@@ -27,12 +27,14 @@ def root():
 
 @app.post("/predict-attack/")
 def predict_attack(data: AttackPredictionRequest):
-    # 🚨 Ensure input sequence matches model expectation
-    if len(data.sequence) != 5:
-        raise HTTPException(status_code=400, detail="Input sequence must have exactly 5 features.")
+    # 🚨 Check if model is trained
+    if not hasattr(model.model, "estimators_"):
+        raise HTTPException(status_code=500, detail="Model is not trained yet. Train the model before making predictions.")
     
     prediction = model.predict_adversarial_attack(data.sequence)
-    return {"attack_prediction": prediction}
+
+    # ✅ Convert NumPy type to Python native type
+    return {"attack_prediction": int(prediction)}
 
 @app.post("/chiral-inversion/")
 def chiral_inversion(data: KnowledgeStateRequest):
