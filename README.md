@@ -12,7 +12,7 @@ This repository implements the **Holographic Fractal Chiral Toroidal Model (HFCT
 
 ## License
 This project is licensed under the [MIT License](LICENSE).  
-Copyright (c) 2024 HFCTM-II Research Group.
+Copyright (c) 2025 HFCTM-II Research Group.
 
 ## Installation
 ```bash
