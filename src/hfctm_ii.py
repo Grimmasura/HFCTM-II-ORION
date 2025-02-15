@@ -29,7 +29,6 @@ class HFCTMII:
         cwt_matrix = scipy.signal.cwt(knowledge_state_series, scipy.signal.ricker, self.wavelet_widths)
         return np.abs(cwt_matrix)
 
-# Example usage
 if __name__ == "__main__":
     hfctm = HFCTMII()
     test_sequence = np.random.normal(0, 0.1, 10)
