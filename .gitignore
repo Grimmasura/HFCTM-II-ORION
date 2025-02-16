@@ -1,2 +1,67 @@
-venv/ 
-__pycache__/ 
+# Python Bytecode Files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environments
+venv/
+env/
+.venv/
+.conda/
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs & Data Files
+logs/
+*.log
+*.out
+*.pid
+*.csv
+*.db
+*.sqlite3
+*.json
+
+# AI & Model Cache
+*.h5
+*.ckpt
+*.onnx
+*.tflite
+model/
+*.pt
+*.pth
+
+# Configurations
+config.yaml
+.env
+secrets.json
+
+# FastAPI & WebSockets Cache
+sessions/
+gunicorn_log/
+gunicorn.sock
+
+# Redis Cache (if using Upstash)
+dump.rdb
+appendonly.aof
+
+# Docker Files
+.dockerignore
+docker-compose.override.yml
+*.tar
+*.img
+
+# NodeJS (if using Frontend)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Git & Build Files
+.DS_Store
+*.bak
+*.orig
+*.re
