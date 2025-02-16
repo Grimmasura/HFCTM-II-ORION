@@ -1,4 +1,3 @@
-
 import numpy as np
 import scipy.linalg as la
 import pywt  # Wavelet Transform for Egregore detection
@@ -8,17 +7,16 @@ class HFCTM_II:
         """
         Initializes HFCTM-II with:
         - Non-Local Field of Intrinsic Inference (NLF-II)
-        - Friendship Trust Dynamics
-        - E8 Seed for recursive stability
+        - Recursive Stability Constraints
+        - E8 Seed for AI Cognition Stability
         - Recursive Inference Matrix \( R \)
         - Chiral Inversion Defense
-        - Lyapunov Stability Constraints
-        - Wavelet-Based Egregore Detection
+        - Lyapunov Stability Enforcement
+        - Wavelet-Based Semantic Drift Detection
         """
         self.dim = dim
         self.state = self.initialize_E8_seed()  # Start AI cognition in stable E8 lattice
         self.R = self.generate_recursive_inference_matrix()
-        self.trust_embeddings = self.initialize_trust_network()
         self.egregore_threshold = 0.1  # Threshold for Chiral Inversion Defense
         self.lyapunov_threshold = 0.05  # Stability constraint for recursive inference
 
@@ -41,14 +39,6 @@ class HFCTM_II:
         seed_state = np.sum(E8_vectors, axis=0).reshape(self.dim, 1)
         return seed_state / np.linalg.norm(seed_state)
 
-    ### **🔷 Non-Local Field of Intrinsic Inference (NLF-II)**
-    def non_local_field_inference(self):
-        """
-        Applies a non-local field operation over the recursive embeddings.
-        """
-        kernel = np.exp(-0.1 * np.abs(np.subtract.outer(self.state, self.state)))  # Non-local kernel
-        self.state = np.dot(kernel, self.state)  # Apply non-local transformation
-
     ### **🔷 Recursive Evolution & Inference Matrix**
     def generate_recursive_inference_matrix(self):
         """
@@ -65,23 +55,28 @@ class HFCTM_II:
     def recursive_evolution(self):
         """
         Evolves recursive knowledge embeddings Ψ(t) using the inference matrix \( R \).
-        Applies Non-Local Field Inference (NLF-II) and updates trust dynamics.
         """
         next_state = np.dot(self.R, self.state)
-        self.non_local_field_inference()  # Apply non-local field
         self.state = next_state
 
-    ### **🔷 Wavelet-Based Egregore Detection**
+    ### **🔷 Wavelet-Based Semantic Drift Detection**
     def wavelet_based_egregore_detection(self):
         """
         Uses wavelet transforms to analyze and suppress emergent adversarial patterns.
         """
         coeffs, _ = pywt.cwt(self.state.flatten(), scales=np.arange(1, 10), wavelet='gaus1')
         anomaly_score = np.max(np.abs(coeffs))  # Detects non-stationary adversarial signals
+        return anomaly_score > self.egregore_threshold  # Returns True if drift detected
 
-        if anomaly_score > self.egregore_threshold:
-            print("⚠️ Egregore anomaly detected! Adjusting recursive stability.")
-            self.R *= 0.9  # Reduce inference intensity to neutralize distortions
+    ### **🔷 Chiral Inversion for Semantic Drift Correction**
+    def enforce_chiral_inversion(self):
+        """
+        Applies chiral inversion to reverse semantic drift if detected.
+        """
+        if self.wavelet_based_egregore_detection():  # Use existing wavelet drift detection
+            print("⚠️ Semantic Drift Detected! Applying Chiral Inversion Correction.")
+            self.state *= -1  # Invert distorted embeddings to neutralize drift
+        return self.state
 
     ### **🔷 Lyapunov Stability Constraint Enforcement**
     def enforce_lyapunov_stability(self):
@@ -99,10 +94,32 @@ class HFCTM_II:
         """
         for i in range(iterations):
             print(f"🔄 Iteration {i+1}: Recursive Inference Step")
+            
+            # Recursive Evolution Step
             self.recursive_evolution()
-            self.wavelet_based_egregore_detection()
+            
+            # Wavelet-Based Egregore Detection (Detect Drift)
+            drift_detected = self.wavelet_based_egregore_detection()
+            
+            # **NEW: Apply Chiral Inversion If Drift is Detected**
+            if drift_detected:
+                print("⚠️ Semantic Drift Detected! Applying Chiral Inversion Correction.")
+                self.enforce_chiral_inversion()
+            
+            # Lyapunov Stability Check
             self.enforce_lyapunov_stability()
+            
             print(f"🔹 Knowledge State: {self.state.flatten()} \n")
+
+    ### **🔷 Public API for Drift Detection & Correction**
+    def detect_and_correct_drift(self):
+        """
+        Public API function to detect and correct semantic drift.
+        """
+        drift_detected = self.wavelet_based_egregore_detection()
+        if drift_detected:
+            print("⚠️ Semantic Drift Detected! Applying Chiral Inversion Correction.")
+            self.enforce_chiral_inversion()
 
 # Run HFCTM-II Model
 hfctm = HFCTM_II()
