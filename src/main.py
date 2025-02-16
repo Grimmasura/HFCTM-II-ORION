@@ -6,7 +6,11 @@ import hashlib
 import time
 import uvicorn
 
-app = FastAPI(title="HFCTM-II Recursive AI API", version="1.1")
+app = FastAPI(
+    title="HFCTM-II Recursive AI API",
+    description="Blockchain-Validated AI with Recursive Intelligence & Self-Correcting Nodes",
+    version="1.2"
+)
 
 # -------------------------------
 # Blockchain-Validated AI Trust System
@@ -157,19 +161,11 @@ def get_blockchain():
 @app.get("/nodes/")
 def get_nodes():
     """ Retrieve AI node trust properties. """
-    node_data = {
-        node: {
-            "Trust Score": float(props["Trust Score"]),  # Convert NumPy float to Python float
-            "Decoherence Level": float(props["Decoherence Level"]),  # Convert NumPy float
-            "Corrected": bool(props["Corrected"]),  # Convert NumPy bool to Python bool
-        }
-        for node, props in ai_network.node_properties.items()
-    }
-    return {"status": "Node Data Retrieved", "nodes": node_data}
+    return {"status": "Node Data Retrieved", "nodes": ai_network.node_properties}
 
 # -------------------------------
 # Running the API
 # -------------------------------
 if __name__ == "__main__":
     print("🚀 HFCTM-II API is now running at http://127.0.0.1:8000/")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
