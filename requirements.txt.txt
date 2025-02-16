@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+numpy
+networkx
+cryptography
+pydantic
+python-dotenv
+pyjwt
+websockets
+requests
