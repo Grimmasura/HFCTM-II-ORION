@@ -1,5 +1,3 @@
-
-
 from fastapi import FastAPI
 import numpy as np
 import scipy.linalg as la
@@ -16,7 +14,18 @@ class InferenceResponse(BaseModel):
     knowledge_state: list
     trust_matrix: list
 
-### **🔷 HFCTM-II Core Class**
+class StabilityResponse(BaseModel):
+    stable: bool
+    max_eigenvalue: float
+
+class DriftResponse(BaseModel):
+    drift_detected: bool
+    correction_applied: bool
+
+class StateResponse(BaseModel):
+    knowledge_state: list
+
+### **🔷 HFCTM-II Core Class with Drift Detection & Correction**
 class HFCTM_II:
     def __init__(self, dim=8):
         """
@@ -27,6 +36,7 @@ class HFCTM_II:
         - Chiral Inversion for adversarial resilience
         - Wavelet-Based Egregore Detection
         - Quantum-Inspired Trust Reinforcement
+        - Semantic Drift Auto-Correction
         """
         self.dim = dim
         self.state = self.initialize_E8_seed()
@@ -69,14 +79,19 @@ class HFCTM_II:
         self.non_local_field_inference()
         self.state = next_state
 
-    ### **🔷 Wavelet-Based Egregore Detection**
+    ### **🔷 Wavelet-Based Semantic Drift Detection**
     def wavelet_based_egregore_detection(self):
         coeffs, _ = pywt.cwt(self.state.flatten(), scales=np.arange(1, 10), wavelet='gaus1')
         anomaly_score = np.max(np.abs(coeffs))
+        return anomaly_score > self.egregore_threshold
 
-        if anomaly_score > self.egregore_threshold:
-            print("⚠️ Egregore anomaly detected! Adjusting recursive stability.")
-            self.R *= 0.9
+    ### **🔷 Chiral Inversion for Semantic Drift Correction**
+    def enforce_chiral_inversion(self):
+        if self.wavelet_based_egregore_detection():
+            print("⚠️ Semantic Drift Detected! Applying Chiral Inversion Correction.")
+            self.state *= -1  # Invert distorted embeddings to neutralize drift
+            return True
+        return False
 
     ### **🔷 Lyapunov Stability Constraint Enforcement**
     def enforce_lyapunov_stability(self):
@@ -93,7 +108,7 @@ class HFCTM_II:
         similarity = np.dot(self.state.T, self.state)
         self.trust_embeddings = np.exp(-0.1 * np.abs(self.trust_embeddings - similarity))
 
-    ### **🔷 Main Inference Cycle for API Calls**
+    ### **🔷 Main Inference Cycle**
     def inference_cycle(self, iterations=1):
         for _ in range(iterations):
             self.recursive_evolution()
@@ -116,3 +131,27 @@ def run_inference(request: InferenceRequest):
         knowledge_state=result["knowledge_state"],
         trust_matrix=result["trust_matrix"]
     )
+
+@app.get("/stability", response_model=StabilityResponse)
+def get_stability_status():
+    eigvals = la.eigvals(hfctm.R)
+    max_eigenvalue = np.max(np.abs(eigvals))
+    return StabilityResponse(
+        stable=max_eigenvalue <= hfctm.lyapunov_threshold,
+        max_eigenvalue=max_eigenvalue
+    )
+
+@app.get("/state", response_model=StateResponse)
+def get_current_state():
+    return StateResponse(knowledge_state=hfctm.state.flatten().tolist())
+
+@app.get("/detect_drift", response_model=DriftResponse)
+def detect_and_correct_drift():
+    drift_detected = hfctm.wavelet_based_egregore_detection()
+    correction_applied = hfctm.enforce_chiral_inversion() if drift_detected else False
+    return DriftResponse(drift_detected=drift_detected, correction_applied=correction_applied)
+
+@app.post("/correct_bias")
+def manually_correct_bias():
+    hfctm.enforce_chiral_inversion()
+    return {"message": "Manual bias correction applied via chiral inversion."}
