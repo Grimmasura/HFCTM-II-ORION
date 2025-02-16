@@ -19,11 +19,29 @@ hfctm = HFCTMII()
 def read_root():
     return {"message": "HFCTM-II API is running with Recursive Ethics and Stability Monitoring!"}
 
+from pydantic import BaseModel
+from fastapi import FastAPI
+
+import numpy as np
+from HFCTM_II import HFCTMII
+
+app = FastAPI()
+hfctm = HFCTMII()
+
+# Define request body model
+class AdversarialAttackRequest(BaseModel):
+    sequence: list[float]  # Explicitly define sequence as a list of floats
+
+@app.get("/")
+def read_root():
+    return {"message": "HFCTM-II API is running with Recursive Ethics and Stability Monitoring!"}
+
 @app.post("/predict/")
-def predict_adversarial_attack(sequence: list):
+def predict_adversarial_attack(request: AdversarialAttackRequest):
     """Predict if an adversarial attack is occurring."""
-    prediction = hfctm.predict_adversarial_attack(sequence)
+    prediction = hfctm.predict_adversarial_attack(request.sequence)
     return {"adversarial_attack": bool(prediction)}
+
 
 @app.post("/stabilize/")
 def stabilize_knowledge_state(state: float, attack_predicted: bool):
