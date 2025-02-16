@@ -1,3 +1,12 @@
+
+
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from HFCTM_II import HFCTMII 
+
 from fastapi import FastAPI
 import numpy as np
 from HFCTM_II import HFCTMII 
