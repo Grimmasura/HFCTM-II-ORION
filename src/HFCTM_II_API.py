@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import numpy as np
-from hfctm_ii import HFCTMII
+from HFCTM-II import HFCTMII
 
 app = FastAPI()
 hfctm = HFCTMII()
