@@ -93,32 +93,6 @@ class RecursiveAINetwork:
         self.blockchain.create_block(self.blockchain.proof_of_work(self.blockchain.last_block['proof']),
                                      previous_hash=self.blockchain.last_block['previous_hash'])
 
-    def run_simulation(self, steps=10):
-        results = []
-        for step in range(steps):
-            step_results = {"step": step + 1, "nodes": []}
-            for node in self.graph.nodes():
-                trust_score = self.node_properties[node]["Trust Score"]
-                decoherence_level = self.node_properties[node]["Decoherence Level"]
-
-                if trust_score >= self.trust_threshold:
-                    step_results["nodes"].append({"node": node, "status": "Trust Verified", "trust_score": trust_score})
-                else:
-                    self.node_properties[node]["Trust Score"] = min(1.0, trust_score + np.random.uniform(0.05, 0.15))
-                    self.node_properties[node]["Decoherence Level"] = max(0.0, decoherence_level - np.random.uniform(0.05, 0.15))
-
-                    if self.node_properties[node]["Trust Score"] >= self.trust_threshold:
-                        step_results["nodes"].append({"node": node, "status": "Self-Correction Successful", "trust_score": self.node_properties[node]["Trust Score"]})
-                        self.blockchain.add_transaction("AI_Node", f"Node_{node}", self.node_properties[node]["Trust Score"])
-                    else:
-                        step_results["nodes"].append({"node": node, "status": "Self-Correction Failed", "trust_score": self.node_properties[node]["Trust Score"]})
-
-            results.append(step_results)
-            if step % 3 == 0:
-                self.blockchain.create_block(self.blockchain.proof_of_work(self.blockchain.last_block['proof']),
-                                             previous_hash=self.blockchain.last_block['previous_hash'])
-        return results
-
 # -------------------------------
 # WebSocket E8 Lattice Mapping
 # -------------------------------
@@ -175,6 +149,34 @@ def get_blockchain():
 @app.get("/nodes/")
 def get_nodes():
     return {"status": "Node Data Retrieved", "nodes": ai_network.node_properties}
+
+# -------------------------------
+# Quantum Coherence Test (IBM Qiskit Free API)
+# -------------------------------
+@app.get("/quantum-coherence/")
+def quantum_coherence_test():
+    """Runs a quantum coherence test on IBM's free cloud simulator."""
+    qc = QuantumCircuit(2)
+    qc.h(0)
+    qc.cx(0, 1)
+    qc.measure_all()
+
+    backend = Aer.get_backend('aer_simulator')
+    job = execute(qc, backend)
+    result = job.result()
+
+    return {"Quantum Simulation Result": result.get_counts()}
+
+# -------------------------------
+# Hugging Face Free LLM Inference
+# -------------------------------
+def query_hugging_face(prompt):
+    """Calls Hugging Face's free hosted LLM inference API."""
+    url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct"
+    headers = {"Authorization": "Bearer YOUR_HUGGINGFACE_API_KEY"}
+    payload = {"inputs": prompt}
+    response = requests.post(url, headers=headers, json=payload)
+    return response.json()
 
 # -------------------------------
 # Running the API
