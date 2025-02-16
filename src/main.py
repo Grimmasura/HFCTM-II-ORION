@@ -6,7 +6,7 @@ import hashlib
 import time
 import uvicorn
 
-app = FastAPI(title="HFCTM-II Recursive AI API", version="1.0")
+app = FastAPI(title="HFCTM-II Recursive AI API", version="1.1")
 
 # -------------------------------
 # Blockchain-Validated AI Trust System
@@ -36,7 +36,7 @@ class Blockchain:
         self.pending_transactions.append({
             'sender': sender,
             'recipient': recipient,
-            'trust_score': trust_score
+            'trust_score': float(trust_score)  # Ensure JSON serialization
         })
         return self.last_block['index'] + 1
 
@@ -83,9 +83,9 @@ class RecursiveAINetwork:
                 corrected = True  
 
             self.node_properties[node] = {
-                "Trust Score": trust_score,
-                "Decoherence Level": decoherence_level,
-                "Corrected": corrected,
+                "Trust Score": float(trust_score),  # Convert NumPy float to Python float
+                "Decoherence Level": float(decoherence_level),  # Convert NumPy float
+                "Corrected": bool(corrected),  # Convert NumPy bool to Python bool
             }
 
             # Add blockchain validation if trust is above threshold
@@ -107,17 +107,17 @@ class RecursiveAINetwork:
 
                 # Trust verification and correction
                 if trust_score >= self.trust_threshold:
-                    step_results["nodes"].append({"node": node, "status": "Trust Verified", "trust_score": trust_score})
+                    step_results["nodes"].append({"node": node, "status": "Trust Verified", "trust_score": float(trust_score)})
                 else:
                     # Attempt self-correction using intrinsic field inference
                     self.node_properties[node]["Trust Score"] = min(1.0, trust_score + np.random.uniform(0.05, 0.15))
                     self.node_properties[node]["Decoherence Level"] = max(0.0, decoherence_level - np.random.uniform(0.05, 0.15))
 
                     if self.node_properties[node]["Trust Score"] >= self.trust_threshold:
-                        step_results["nodes"].append({"node": node, "status": "Self-Correction Successful", "trust_score": self.node_properties[node]["Trust Score"]})
+                        step_results["nodes"].append({"node": node, "status": "Self-Correction Successful", "trust_score": float(self.node_properties[node]["Trust Score"])})
                         self.blockchain.add_transaction("AI_Node", f"Node_{node}", self.node_properties[node]["Trust Score"])
                     else:
-                        step_results["nodes"].append({"node": node, "status": "Self-Correction Failed", "trust_score": self.node_properties[node]["Trust Score"]})
+                        step_results["nodes"].append({"node": node, "status": "Self-Correction Failed", "trust_score": float(self.node_properties[node]["Trust Score"])})
 
             results.append(step_results)
 
@@ -145,7 +145,7 @@ def run_simulation(request: SimulationRequest):
     """ Run a recursive AI trust simulation. """
     if request.steps < 1:
         raise HTTPException(status_code=400, detail="Number of steps must be greater than 0.")
-    
+
     result = ai_network.run_simulation(steps=request.steps)
     return {"status": "Simulation Completed", "data": result}
 
@@ -157,7 +157,15 @@ def get_blockchain():
 @app.get("/nodes/")
 def get_nodes():
     """ Retrieve AI node trust properties. """
-    return {"status": "Node Data Retrieved", "nodes": ai_network.node_properties}
+    node_data = {
+        node: {
+            "Trust Score": float(props["Trust Score"]),  # Convert NumPy float to Python float
+            "Decoherence Level": float(props["Decoherence Level"]),  # Convert NumPy float
+            "Corrected": bool(props["Corrected"]),  # Convert NumPy bool to Python bool
+        }
+        for node, props in ai_network.node_properties.items()
+    }
+    return {"status": "Node Data Retrieved", "nodes": node_data}
 
 # -------------------------------
 # Running the API
