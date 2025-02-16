@@ -1,44 +1,10 @@
-# Core Python dependencies
-numpy
-scipy
-sympy
-matplotlib
-pandas
-networkx
-
-# Machine learning & AI
-tensorflow
-torch
-transformers
-scikit-learn
-xgboost
-
-# Quantum computing & stability analysis
-qiskit
-pennylane
-lyapunov
-
-# Signal processing & wavelet analysis
-pywavelets
-
-# Cryptography for self-validation
-pycryptodome
-hashlib
-
-# Web framework (if deploying API)
 fastapi
 uvicorn
-
-# Backend & database
-sqlalchemy
-postgres
-redis
-
-# E8 Lattice & higher-dimensional embeddings
-quaternion
-liepy
-
-# System utilities
-psutil
-tqdm
-loguru
+numpy
+networkx
+requests
+websockets
+qiskit
+scipy
+pydantic
+pywavelets
