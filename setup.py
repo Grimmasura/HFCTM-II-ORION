@@ -1,29 +1,51 @@
-from setuptools import setup, find_packages
+import os
+import subprocess
+import sys
 
-setup(
-    name="HFCTM_II",
-    version="1.0",
-    packages=find_packages(where="src"),  # Ensure it finds the packages inside src/
-    package_dir={"": "src"},  # Defines "src/" as the root for package discovery
-    install_requires=[
-        "numpy",
-        "scipy",
-        "scikit-learn",
-        "fastapi",
-        "uvicorn",
-        "pydantic"
-    ],
-    include_package_data=True,  # Includes non-Python files if any exist
-    author="GrimmSeraph",
-    author_email="Joshuahumphrey@duck.com",  # Replace with your actual email
-    description="A deployable package for HFCTM-II adversarial resilience and recursive stability.",
-    long_description=open("README.md").read(),  # Reads description from README.md
-    long_description_content_type="text/markdown",
-    url="https://github.com/Grimmasura/HFCTM-II_Egregore_Defense_AI_Security",  # Replace with actual URL
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-    ],
-    python_requires=">=3.8",  # Ensures compatibility with Python 3.8+
-)
+### 📌 STEP 1: CREATE A VIRTUAL ENVIRONMENT (OPTIONAL, BUT RECOMMENDED)
+venv_dir = "venv"
+if not os.path.exists(venv_dir):
+    print("🔧 Creating virtual environment...")
+    subprocess.run([sys.executable, "-m", "venv", venv_dir], check=True)
+
+# Activate virtual environment (Windows)
+activate_script = os.path.join(venv_dir, "Scripts", "activate")
+if sys.platform == "win32":
+    activate_command = f"{activate_script}.bat"
+else:
+    activate_command = f"source {activate_script}"
+
+print("🔄 Activating virtual environment...")
+subprocess.run(activate_command, shell=True, check=True)
+
+### 📌 STEP 2: INSTALL REQUIRED DEPENDENCIES
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "PyWavelets",  # For wavelet-based egregore detection
+    "numpy",
+    "scipy",
+    "pydantic"
+]
+
+print("📦 Installing dependencies...")
+subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], check=True)
+subprocess.run([sys.executable, "-m", "pip", "install"] + dependencies, check=True)
+
+### 📌 STEP 3: CONFIRM INSTALLATION
+try:
+    import fastapi
+    import uvicorn
+    import pywt
+    import numpy as np
+    import scipy.linalg as la
+    import pydantic
+
+    print("✅ All dependencies installed successfully!")
+except ImportError as e:
+    print(f"❌ ERROR: {e}")
+    sys.exit(1)
+
+### 📌 STEP 4: START FASTAPI SERVER AUTOMATICALLY
+print("🚀 Starting HFCTM-II API...")
+subprocess.run(["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"])
