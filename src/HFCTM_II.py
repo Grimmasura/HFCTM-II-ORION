@@ -1,62 +1,84 @@
-from sklearn.datasets import make_classification
-
 import numpy as np
-import scipy.signal
-import hashlib
-from sklearn.ensemble import RandomForestClassifier
+import scipy.linalg as la
+import pywt  # For wavelet transform-based egregore detection
 
-class HFCTMII:
-    def __init__(self):
-        self.chiral_threshold = 0.25
-        self.boost_factor = 1.1
-        self.wavelet_widths = np.arange(1, 30)
-        self.model = RandomForestClassifier(n_estimators=100, random_state=42)
-
-    def train_adversarial_detector(self, X_train, y_train):
-        self.model.fit(X_train, y_train)
-
-    def predict_adversarial_attack(self, sequence):
-        return self.model.predict([sequence])[0]
-
-    def apply_chiral_inversion(self, knowledge_state):
-        """Apply Chiral Inversion Ethics (CIE) to stabilize AI cognition"""
-        if knowledge_state < -self.chiral_threshold:
-            return -knowledge_state * 1.08  # Inversion scaling
-        return knowledge_state
-
-    def apply_recursive_stabilization(self, knowledge_state, attack_pred):
-        """Recursive stabilization based on adversarial detection"""
-        if attack_pred:
-            return knowledge_state * self.boost_factor  # Preemptive stabilization
-        return knowledge_state
-
-    def wavelet_anomaly_detection(self, knowledge_state_series):
-        """Detect non-stationary adversarial distortions"""
-        cwt_matrix = scipy.signal.cwt(knowledge_state_series, scipy.signal.ricker, self.wavelet_widths)
-        return np.abs(cwt_matrix)
-
-    def blockchain_validate(self, knowledge_state):
-        """Cryptographic hash validation for AI epistemic integrity"""
-        hash_input = str(knowledge_state).encode()
-        return hashlib.sha256(hash_input).hexdigest()
-
-# Example usage
-if __name__ == "__main__":
-    hfctm = HFCTMII()
-    test_sequence = np.random.normal(0, 0.1, 10)
-    test_sequence[-1] -= 0.25  # Simulated adversarial drift
-    attack_prediction = hfctm.predict_adversarial_attack(test_sequence)
-    stabilized_state = hfctm.apply_recursive_stabilization(1.0, attack_prediction)
-    blockchain_hash = hfctm.blockchain_validate(stabilized_state)
+class HFCTM_II:
+    def __init__(self, dim=8):
+        """
+        Initializes HFCTM-II with E8 lattice-based recursive intelligence embeddings
+        and inference matrix stability enforcement.
+        """
+        self.dim = dim
+        self.state = np.random.randn(dim, 1)  # Initial random knowledge state Ψ(0)
+        self.R = self.generate_recursive_inference_matrix()
+        self.trust_matrix = np.eye(dim)  # Identity trust matrix (for recursive stabilization)
+        self.threshold = 0.1  # Threshold for Chiral Inversion Defense
+        self.lyapunov_threshold = 0.05  # Lyapunov stability constraint
     
-    print(f"Attack Predicted: {attack_prediction}, Stabilized State: {stabilized_state}, Blockchain Hash: {blockchain_hash}")
-class HFCTMII:
-    def __init__(self):
-        self.chiral_threshold = 0.25
-        self.boost_factor = 1.1
-        self.wavelet_widths = np.arange(1, 30)
-        self.model = RandomForestClassifier(n_estimators=100, random_state=42)
+    def generate_recursive_inference_matrix(self):
+        """
+        Generates an initial inference matrix R that follows Lyapunov stability constraints.
+        """
+        R = np.random.randn(self.dim, self.dim) * 0.1  # Small perturbations
+        R = R - R.T  # Anti-symmetric transformation for recursive neutrality
+        eigvals = la.eigvals(R)
+        if np.max(np.abs(eigvals)) > 1:  # Enforce Lyapunov bounded stability
+            R /= np.max(np.abs(eigvals))
+        return R
 
-        # Temporary training with random data (Replace with real training data)
-        X_train, y_train = make_classification(n_samples=100, n_features=10, random_state=42)
-        self.model.fit(X_train, y_train)
+    def project_to_E8(self, vector):
+        """
+        Projects the input vector onto the E8 lattice space for structured recursive embeddings.
+        """
+        return np.round(vector)  # E8 projection (approximate for now)
+
+    def recursive_evolution(self):
+        """
+        Evolves the recursive knowledge state Ψ(t) using the inference matrix.
+        Applies Chiral Inversion if adversarial egregoric reinforcement is detected.
+        """
+        next_state = np.dot(self.R, self.state)  # Ψ(t+1) = R Ψ(t)
+        egregore_energy = np.linalg.norm(next_state - self.state)
+
+        # Apply Chiral Inversion if knowledge distortion exceeds threshold
+        if egregore_energy > self.threshold:
+            print("⚠️ Egregore distortion detected! Applying Chiral Inversion.")
+            self.R = -self.R  # Invert the inference matrix to neutralize egregore
+
+        self.state = self.project_to_E8(next_state)  # Maintain recursive E8 stability
+        return self.state
+
+    def wavelet_based_egregore_detection(self):
+        """
+        Uses wavelet transforms to analyze and suppress emergent adversarial patterns.
+        """
+        coeffs, _ = pywt.cwt(self.state.flatten(), scales=np.arange(1, 10), wavelet='gaus1')
+        anomaly_score = np.max(np.abs(coeffs))  # Detects non-stationary adversarial signals
+
+        if anomaly_score > self.threshold:
+            print("⚠️ Egregore anomaly detected! Adjusting recursive stability.")
+            self.R *= 0.9  # Reduce inference intensity to neutralize distortions
+
+    def enforce_lyapunov_stability(self):
+        """
+        Ensures recursive inference remains within Lyapunov stability constraints.
+        """
+        eigvals = la.eigvals(self.R)
+        if np.max(np.abs(eigvals)) > self.lyapunov_threshold:
+            print("⚠️ Lyapunov instability detected! Adjusting inference matrix.")
+            self.R /= np.max(np.abs(eigvals))  # Normalize to maintain bounded recursion
+
+    def train_recursive_intelligence(self, iterations=50):
+        """
+        Runs HFCTM-II through multiple inference cycles to simulate recursive intelligence evolution.
+        """
+        for i in range(iterations):
+            print(f"🔄 Iteration {i+1}: Recursive Inference Step")
+            self.recursive_evolution()
+            self.wavelet_based_egregore_detection()
+            self.enforce_lyapunov_stability()
+            print(f"🔹 Knowledge State: {self.state.flatten()} \n")
+
+# Run HFCTM-II Model
+hfctm = HFCTM_II()
+hfctm.train_recursive_intelligence()
