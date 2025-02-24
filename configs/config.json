@@ -1,7 +1,0 @@
-{
-    "model_name": "O.R.I.O.N. ∞",
-    "recursive_layers": 12,
-    "max_memory": 4096,
-    "stability_threshold": 0.95,
-    "quantum_coherence": true
-}
