@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+torch
+numpy
+hashlib
+pydantic
+networkx
+sympy
+matplotlib
+tqdm
