@@ -1,67 +1,16 @@
-# Python Bytecode Files
+# Ignore Python compiled files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Virtual Environments
+# Ignore environment and dependencies
 venv/
 env/
-.venv/
-.conda/
-
-# IDE & Editor Files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Logs & Data Files
-logs/
 *.log
-*.out
-*.pid
-*.csv
-*.db
-*.sqlite3
-*.json
 
-# AI & Model Cache
-*.h5
-*.ckpt
-*.onnx
-*.tflite
-model/
-*.pt
-*.pth
+# Ignore Jupyter Notebook checkpoints (if used)
+.ipynb_checkpoints/
 
-# Configurations
-config.yaml
-.env
-secrets.json
-
-# FastAPI & WebSockets Cache
-sessions/
-gunicorn_log/
-gunicorn.sock
-
-# Redis Cache (if using Upstash)
-dump.rdb
-appendonly.aof
-
-# Docker Files
-.dockerignore
-docker-compose.override.yml
-*.tar
-*.img
-
-# NodeJS (if using Frontend)
-node_modules/
-package-lock.json
-yarn.lock
-
-# Git & Build Files
+# Ignore system-specific files
 .DS_Store
-*.bak
-*.orig
-*.re
