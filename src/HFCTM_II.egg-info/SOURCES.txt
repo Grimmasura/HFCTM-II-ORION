@@ -1,8 +1,0 @@
-LICENSE
-README.md
-setup.py
-src/HFCTM_II.egg-info/PKG-INFO
-src/HFCTM_II.egg-info/SOURCES.txt
-src/HFCTM_II.egg-info/dependency_links.txt
-src/HFCTM_II.egg-info/requires.txt
-src/HFCTM_II.egg-info/top_level.txt
