@@ -1,0 +1,11 @@
+torch
+numpy
+fastapi
+uvicorn
+hashlib
+pydantic
+networkx
+sympy
+matplotlib
+qiskit
+transformers

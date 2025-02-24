@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orion-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: orion-api
+  template:
+    metadata:
+      labels:
+        app: orion-api
+    spec:
+      containers:
+      - name: orion-api
+        image: your-dockerhub-user/orion-api:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
