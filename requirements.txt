@@ -1,10 +1,11 @@
-fastapi
-uvicorn
 torch
 numpy
+fastapi
+uvicorn
 hashlib
 pydantic
 networkx
 sympy
 matplotlib
-tqdm
+qiskit
+transformers
