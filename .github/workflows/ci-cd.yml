@@ -65,17 +65,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Initialize CodeQL (Updated to v3 & Removed Config File Reference)
-        uses: github/codeql-action/init@v3  # Updated to v3
-
-      - name: Run Security Scan (Fixed Permissions)
-        continue-on-error: true
-        uses: github/codeql-action/analyze@v3  # Updated to v3
-
-      - name: Upload SARIF Report (Fix Missing Upload Step)
-        uses: github/codeql-action/upload-sarif@v3  # Updated to v3
+      - name: Initialize CodeQL (Updated to v3 & Ensured SARIF File is Generated)
+        uses: github/codeql-action/init@v3
         with:
-          sarif_file: results.sarif
+          languages: python
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      - name: List Files in Directory (Debugging Step for SARIF File)
+        run: ls -alh
+
+      - name: Upload SARIF Report (Fix Missing File Path)
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results/codeql.sarif  # Adjusted to CodeQL's expected output
 
   deploy:
     needs: [build, security]
