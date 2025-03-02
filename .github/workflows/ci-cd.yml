@@ -37,16 +37,17 @@ jobs:
         run: mkdir -p test-results
 
       - name: Run tests with pytest
-        continue-on-error: true
+        continue-on-error: true  # Prevents workflow failure if tests fail
         run: |
-          pytest --junitxml=test-results/test-results.xml --tb=short || echo "Tests failed but continuing workflow"
+          pytest --junitxml=test-results/test-results.xml --tb=short 2>&1 | tee test-results/errors.log || echo "Tests failed but continuing workflow"
           if [ ! -s test-results/test-results.xml ]; then echo "<testsuite></testsuite>" > test-results/test-results.xml; fi
-          pytest || echo "Pytest failed, logging errors" > test-results/errors.log
+          if [ ! -s test-results/errors.log ]; then echo "No errors logged" > test-results/errors.log; fi
 
       - name: Debug Test Results
         run: |
           ls -lah test-results/
           cat test-results/test-results.xml || echo "No test results found"
+          cat test-results/errors.log || echo "No errors logged"
 
       - name: Archive test results
         uses: actions/upload-artifact@v4
