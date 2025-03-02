@@ -1,0 +1,15 @@
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environments
+venv/
+.env/
+
+# Ignore model files
+models/*.zip
+
+# Ignore logs and cache files
+logs/
+cache/
