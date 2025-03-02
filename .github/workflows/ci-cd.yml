@@ -1,108 +1,45 @@
-name: HFCTM-II-ORION CI/CD
+name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [main]
   pull_request:
-    branches:
-      - main
-
-permissions:
-  contents: read
-  security-events: write
-  actions: read
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily at midnight UTC
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set Up Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.8'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
-          if [ -f "requirements.txt" ]; then
-            echo "📦 Installing dependencies from requirements.txt"
-            pip install -r requirements.txt || echo "⚠️ Dependency installation failed, but continuing..."
-          else
-            echo "⚠️ No requirements.txt found. Skipping dependency installation."
-          fi
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Install Linting & Testing Tools
-        run: |
-          pip install flake8 pytest || echo "⚠️ Linting & testing tools failed to install, but continuing..."
+      - name: Run tests
+        run: pytest
 
-      - name: Lint Code (Non-Fatal)
-        continue-on-error: true
-        run: |
-          if command -v flake8 >/dev/null 2>&1; then
-            flake8 . --count --show-source --statistics || echo "⚠️ Linting issues detected, but continuing..."
-          else
-            echo "⚠️ flake8 not found. Skipping linting."
-          fi
-
-      - name: Run Tests (Non-Fatal)
-        continue-on-error: true
-        run: |
-          if command -v pytest >/dev/null 2>&1; then
-            pytest || echo "⚠️ Tests failed, but continuing..."
-          else
-            echo "⚠️ pytest not found. Skipping tests."
-          fi
-
-  security:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL (Ensuring SARIF is Generated)
-        uses: github/codeql-action/init@v3
-        with:
-          languages: python
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-
-      - name: Debugging: List All Files After Analysis
-        run: ls -R
-
-      - name: Check for SARIF File Before Upload
-        id: check_sarif
-        run: |
-          if [ -f "results/codeql.sarif" ]; then
-            echo "SARIF file found. Proceeding with upload."
-            echo "SARIF_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "SARIF file NOT found! Listing all files for debugging:"
-            ls -R
-            echo "SARIF_EXISTS=false" >> $GITHUB_ENV
-            exit 1
-
-      - name: Upload SARIF Report
-        if: env.SARIF_EXISTS == 'true'
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results/codeql.sarif
+      - name: Lint code
+        run: flake8 .
 
   deploy:
-    needs: [build, security]
+    needs: build-and-test  # Run only if tests pass
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
+    if: github.ref == 'refs/heads/main'  # Only deploy on main branch
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy Application (Placeholder)
-        run: |
-          echo "🚀 Deploying application... (Modify this step as needed)"
+      - name: Deploy to Production
+        env:
+          API_KEY: ${{ secrets.PRODUCTION_API_KEY }}
+        run: ./deploy.sh
