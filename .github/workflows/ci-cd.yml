@@ -81,14 +81,15 @@ jobs:
         run: |
           if [ -f "results/codeql.sarif" ]; then
             echo "SARIF file found. Proceeding with upload."
-            echo "sarif_exists=true" >> $GITHUB_ENV
+            echo "SARIF_EXISTS=true" >> $GITHUB_ENV
           else
             echo "SARIF file NOT found! Listing all files for debugging:"
             ls -R
-            echo "sarif_exists=false" >> $GITHUB_ENV
+            echo "SARIF_EXISTS=false" >> $GITHUB_ENV
+            exit 1
 
       - name: Upload SARIF Report
-        if: ${{ env.sarif_exists == 'true' }}
+        if: env.SARIF_EXISTS == 'true'
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results/codeql.sarif
