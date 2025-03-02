@@ -1,10 +1,20 @@
+import os
 from stable_baselines3 import PPO
 
-agent = PPO.load("recursive_live_optimization_model")
+MODEL_PATH = "models/recursive_live_optimization_model.zip"
 
-def recursive_model_live(query, depth):
-    optimal_depth = agent.predict(depth)[0]
-    if optimal_depth == 0:
-        return f"Base case: {query}"
-    response = f"Recursive Expansion of '{query}' at depth {optimal_depth}"
-    return response + "\n" + recursive_model_live(query, optimal_depth - 1)
+# Ensure the models directory exists
+if not os.path.exists("models"):
+    os.makedirs("models")
+
+# Check if the model exists, if not, attempt to download it
+if not os.path.exists(MODEL_PATH):
+    print(f"Model file '{MODEL_PATH}' not found. Downloading...")
+    os.system(f"curl -L -o {MODEL_PATH} https://your-storage-url/model.zip")
+
+# Load the model
+try:
+    agent = PPO.load(MODEL_PATH)
+    print("Model loaded successfully.")
+except Exception as e:
+    raise RuntimeError(f"Error loading model: {e}")
