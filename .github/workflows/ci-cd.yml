@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Corrected version reference
 
       - name: Set Up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v4  # Corrected version reference
         with:
           python-version: '3.10'
 
@@ -54,11 +54,11 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Corrected version reference
 
-      - name: Run Security Scan (Skip if CodeQL Unavailable)
+      - name: Run Security Scan (Fixed Reference)
         continue-on-error: true
-        uses: github/codeql-action/analyze
+        uses: github/codeql-action/analyze@v2  # Corrected version reference
         with:
           category: "security"
 
@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Corrected version reference
 
       - name: Deploy Application (Placeholder)
         run: |
