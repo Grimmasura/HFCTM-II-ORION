@@ -12,6 +12,7 @@ on:
 permissions:
   contents: read
   security-events: write
+  actions: read
 
 jobs:
   build:
@@ -26,14 +27,18 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies (Skip if Missing)
-        continue-on-error: true
+      - name: Install Dependencies (With Debugging)
         run: |
           if [ -f "requirements.txt" ]; then
-            pip install -r requirements.txt
+            echo "📦 Installing dependencies from requirements.txt"
+            pip install -r requirements.txt || echo "⚠️ Dependency installation failed, but continuing..."
           else
             echo "⚠️ No requirements.txt found. Skipping dependency installation."
           fi
+
+      - name: Install Linting & Testing Tools (Explicit)
+        run: |
+          pip install flake8 pytest || echo "⚠️ Linting & testing tools failed to install, but continuing..."
 
       - name: Lint Code (Non-Fatal)
         continue-on-error: true
@@ -60,16 +65,22 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2  # Fix: Added initialization step
+      - name: Initialize CodeQL (Fix Config Not Found Issue)
+        uses: github/codeql-action/init@v2
         with:
           languages: python
+          config-file: .github/codeql-config.yml  # Explicit config reference
 
       - name: Run Security Scan (Fixed Permissions)
         continue-on-error: true
-        uses: github/codeql-action/analyze@v2  # Corrected reference
+        uses: github/codeql-action/analyze@v2
         with:
           category: "security"
+
+      - name: Upload SARIF Report (Fix Missing Upload Step)
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
 
   deploy:
     needs: [build, security]
