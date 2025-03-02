@@ -65,20 +65,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Initialize CodeQL (Fix Config Not Found Issue)
-        uses: github/codeql-action/init@v2
-        with:
-          languages: python
-          config-file: .github/codeql-config.yml  # Explicit config reference
+      - name: Initialize CodeQL (Updated to v3 & Removed Config File Reference)
+        uses: github/codeql-action/init@v3  # Updated to v3
 
       - name: Run Security Scan (Fixed Permissions)
         continue-on-error: true
-        uses: github/codeql-action/analyze@v2
-        with:
-          category: "security"
+        uses: github/codeql-action/analyze@v3  # Updated to v3
 
       - name: Upload SARIF Report (Fix Missing Upload Step)
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3  # Updated to v3
         with:
           sarif_file: results.sarif
 
