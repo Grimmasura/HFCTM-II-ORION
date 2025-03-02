@@ -80,13 +80,13 @@ jobs:
         run: |
           if [ -f "results/codeql.sarif" ]; then
             echo "✅ SARIF file found, proceeding with upload."
+            exit 0
           else
             echo "❌ SARIF file NOT found! Listing all files for debugging:"
             ls -R
-            exit 1  # Force failure if SARIF is missing
-          fi
+            exit 1
 
-      - name: Upload SARIF Report (Fail-Safe)
+      - name: Upload SARIF Report
         if: success()
         uses: github/codeql-action/upload-sarif@v3
         with:
