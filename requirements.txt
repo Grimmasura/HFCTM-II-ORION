@@ -9,3 +9,4 @@ qiskit==0.45.0
 transformers==4.38.1
 pytest==8.0.0
 httpx==0.27.0  # Added missing dependency
+stable-baselines3==2.2.1
