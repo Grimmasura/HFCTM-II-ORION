@@ -1,58 +1,38 @@
 import os
-import gym
-import requests
+import urllib.request
 from stable_baselines3 import PPO
-from stable_baselines3.common.envs import DummyVecEnv
+import gym  # Ensure you have the correct environment for training
 
-# ✅ Define Paths
+# Define paths
 MODEL_DIR = "models"
-MODEL_NAME = "recursive_live_optimization_model.zip"
-MODEL_PATH = os.path.join(MODEL_DIR, MODEL_NAME)
-MODEL_URL = "https://your-valid-storage-url.com/recursive_live_optimization_model.zip"  # 🔄 FIX URL
+MODEL_PATH = os.path.join(MODEL_DIR, "recursive_live_optimization_model.zip")
+MODEL_URL = "https://github.com/YOUR_GITHUB_USER/YOUR_REPO/releases/download/v1.0/recursive_live_optimization_model.zip"
 
-# ✅ Create Model Directory If Missing
-if not os.path.exists(MODEL_DIR):
-    os.makedirs(MODEL_DIR)
+# Ensure the models directory exists
+os.makedirs(MODEL_DIR, exist_ok=True)
 
-# ✅ Download Model If Missing
+# If the model file doesn't exist, download or train
 if not os.path.exists(MODEL_PATH):
-    print(f"🚀 Model {MODEL_NAME} missing! Attempting to download from {MODEL_URL}...")
+    print("🔴 Model file missing! Downloading or training...")
+
     try:
-        response = requests.get(MODEL_URL, stream=True)
-        if response.status_code == 200:
-            with open(MODEL_PATH, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            print(f"✅ Model downloaded successfully: {MODEL_PATH}")
-        else:
-            print(f"⚠️ Failed to download model! Training a new one instead...")
+        # Attempt to download from GitHub Releases
+        print(f"⬇ Downloading model from {MODEL_URL}...")
+        urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+        print("✅ Download complete.")
+
     except Exception as e:
-        print(f"🔥 ERROR: Could not download model: {e}. Training a new one...")
+        print(f"⚠ Download failed: {e}\n🚀 Training a new model instead...")
 
-# ✅ Train New Model If No Valid File
-if not os.path.exists(MODEL_PATH):
-    print("🚀 Training new recursive AI model...")
-    class RecursiveAIEnv(gym.Env):
-        def __init__(self):
-            super(RecursiveAIEnv, self).__init__()
-            self.action_space = gym.spaces.Discrete(3)
-            self.observation_space = gym.spaces.Box(low=0, high=1, shape=(5,), dtype=float)
+        # Train a new model
+        env = gym.make("CartPole-v1")  # Replace with your actual environment
+        model = PPO("MlpPolicy", env, verbose=1)
+        model.learn(total_timesteps=10000)  # Adjust as needed
+        model.save(MODEL_PATH)
 
-        def reset(self):
-            return self.observation_space.sample()
+        print(f"✅ Model training complete. Saved to: {MODEL_PATH}")
 
-        def step(self, action):
-            reward = 1 if action == 1 else 0
-            done = False
-            return self.observation_space.sample(), reward, done, {}
-
-    env = DummyVecEnv([lambda: RecursiveAIEnv()])
-    model = PPO("MlpPolicy", env, verbose=1)
-    model.learn(total_timesteps=5000)
-    model.save(MODEL_PATH)
-    print(f"✅ New model trained and saved at {MODEL_PATH}")
-
-# ✅ Load Model
-print("🔄 Loading model...")
+# Load the trained or downloaded model
+print("📥 Loading model...")
 agent = PPO.load(MODEL_PATH)
-print("✅ Model Loaded Successfully!")
+print("✅ Model loaded successfully.")
