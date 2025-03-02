@@ -1,0 +1,63 @@
+openapi: "3.0.1"
+info:
+  title: "GitHub Integration"
+  version: "1.0.0"
+servers:
+  - url: "https://api.github.com"
+paths:
+  /repos/{owner}/{repo}/actions/workflows:
+    get:
+      operationId: "listWorkflows"
+      summary: "List GitHub Actions workflows"
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "List of workflows"
+          content:
+            application/json:
+              schema:
+                type: object
+  /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches:
+    post:
+      operationId: "triggerWorkflow"
+      summary: "Trigger a workflow dispatch event"
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: workflow_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ref:
+                  type: string
+                inputs:
+                  type: object
+      responses:
+        "204":
+          description: "Workflow triggered"
