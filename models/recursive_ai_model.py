@@ -18,8 +18,15 @@ class RecursiveAIEnv(gym.Env):
         done = False
         return self.observation_space.sample(), reward, done, {}
 
-# Train Model if Not Exists
-MODEL_PATH = "models/recursive_live_optimization_model.zip"
+# Set Model Path
+MODEL_DIR = "models"
+MODEL_PATH = os.path.join(MODEL_DIR, "recursive_live_optimization_model.zip")
+
+# Ensure Model Directory Exists
+if not os.path.exists(MODEL_DIR):
+    os.makedirs(MODEL_DIR)
+
+# Check if Model Exists or Needs Training
 if not os.path.exists(MODEL_PATH):
     print("🚀 Model not found! Training new one...")
     env = DummyVecEnv([lambda: RecursiveAIEnv()])
