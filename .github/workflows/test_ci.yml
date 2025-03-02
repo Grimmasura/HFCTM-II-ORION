@@ -16,12 +16,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+
+      - name: Clean Pycache
+        run: find . -name "*.pyc" -delete && find . -name "__pycache__" -delete
 
       - name: Verify Workflow Execution
         run: echo "✅ GitHub Actions workflow test is running successfully!"
-
-      - name: List Repository Files
-        run: ls -lah
-
-      - name: Show GitHub Environment Variables
-        run: env | sort
