@@ -1,0 +1,27 @@
+name: CI Test Workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Verify Workflow Execution
+        run: echo "✅ GitHub Actions workflow test is running successfully!"
+
+      - name: List Repository Files
+        run: ls -lah
+
+      - name: Show GitHub Environment Variables
+        run: env | sort
