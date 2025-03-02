@@ -1,0 +1,38 @@
+name: 🚀 Deploy ORION
+
+on:
+  push:
+    branches:
+      - main  # Adjust branch if needed
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔐 Authenticate with GitHub
+        run: |
+          git config --global user.email "your-email@example.com"
+          git config --global user.name "GitHub Actions Bot"
+          git remote set-url origin https://YOUR_GITHUB_USERNAME:${{ secrets.GH_PAT }}@github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY.git
+
+      - name: 🏗️ Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🚀 Run Tests
+        run: pytest --disable-warnings
+
+      - name: 🎯 Deploy Application
+        run: |
+          nohup uvicorn orion_api.main:app --host 0.0.0.0 --port 8080 &
