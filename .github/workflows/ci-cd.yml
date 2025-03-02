@@ -65,7 +65,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Initialize CodeQL (Updated to v3 & Ensured SARIF File is Generated)
+      - name: Initialize CodeQL (Ensuring SARIF is Generated)
         uses: github/codeql-action/init@v3
         with:
           languages: python
@@ -73,13 +73,24 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
 
-      - name: List Files in Directory (Debugging Step for SARIF File)
-        run: ls -alh
+      - name: Debugging: List All Files After Analysis
+        run: ls -R
 
-      - name: Upload SARIF Report (Fix Missing File Path)
+      - name: Check for SARIF File
+        run: |
+          if [ -f "results/codeql.sarif" ]; then
+            echo "✅ SARIF file found, proceeding with upload."
+          else
+            echo "❌ SARIF file NOT found! Listing all files for debugging:"
+            ls -R
+            exit 1  # Force failure if SARIF is missing
+          fi
+
+      - name: Upload SARIF Report (Fail-Safe)
+        if: success()
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: results/codeql.sarif  # Adjusted to CodeQL's expected output
+          sarif_file: results/codeql.sarif
 
   deploy:
     needs: [build, security]
