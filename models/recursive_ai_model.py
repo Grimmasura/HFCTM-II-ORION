@@ -1,20 +1,34 @@
 import os
 from stable_baselines3 import PPO
+from stable_baselines3.common.envs import DummyVecEnv
+import gym
 
+# Define Environment
+class RecursiveAIEnv(gym.Env):
+    def __init__(self):
+        super(RecursiveAIEnv, self).__init__()
+        self.action_space = gym.spaces.Discrete(3)  # Example actions
+        self.observation_space = gym.spaces.Box(low=0, high=1, shape=(5,), dtype=float)
+
+    def reset(self):
+        return self.observation_space.sample()
+
+    def step(self, action):
+        reward = 1 if action == 1 else 0
+        done = False
+        return self.observation_space.sample(), reward, done, {}
+
+# Train Model if Not Exists
 MODEL_PATH = "models/recursive_live_optimization_model.zip"
-
-# Ensure the models directory exists
-if not os.path.exists("models"):
-    os.makedirs("models")
-
-# Check if the model exists, if not, attempt to download it
 if not os.path.exists(MODEL_PATH):
-    print(f"Model file '{MODEL_PATH}' not found. Downloading...")
-    os.system(f"curl -L -o {MODEL_PATH} https://your-storage-url/model.zip")
+    print("🚀 Model not found! Training new one...")
+    env = DummyVecEnv([lambda: RecursiveAIEnv()])
+    model = PPO("MlpPolicy", env, verbose=1)
+    model.learn(total_timesteps=10000)
+    model.save(MODEL_PATH)
+    print(f"✅ Model trained and saved at {MODEL_PATH}")
 
-# Load the model
-try:
-    agent = PPO.load(MODEL_PATH)
-    print("Model loaded successfully.")
-except Exception as e:
-    raise RuntimeError(f"Error loading model: {e}")
+# Load Model
+print("🔄 Loading Model...")
+agent = PPO.load(MODEL_PATH)
+print("✅ Model Loaded Successfully")
