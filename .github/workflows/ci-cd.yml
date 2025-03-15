@@ -34,12 +34,17 @@ jobs:
       - name: Start FastAPI Server
         run: |
           nohup uvicorn orion_api.main:app --host 0.0.0.0 --port 8080 > uvicorn.log 2>&1 &
+          sleep 5  # Give the server time to start
+        working-directory: HFCTM-II-ORION
+
+      - name: Wait for API to Start
+        run: |
+          echo "Waiting for FastAPI server..."
           for i in {1..10}; do
             curl --silent --fail http://localhost:8080/docs && break
-            echo "Waiting for API to start..."
+            echo "Retrying in 3 seconds..."
             sleep 3
-          done
-        working-directory: HFCTM-II-ORION
+          done || exit 1
 
       - name: Run Tests
         run: pytest --disable-warnings --maxfail=5 --tb=short
