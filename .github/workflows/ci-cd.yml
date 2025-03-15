@@ -27,12 +27,19 @@ jobs:
           pip install -r requirements.txt
 
       - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$(pwd)/HFCTM-II-ORION" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
       - name: Start FastAPI Server
         run: |
-          nohup uvicorn orion_api.main:app --host 0.0.0.0 --port 8080 &
+          nohup uvicorn orion_api.main:app --host 0.0.0.0 --port 8080 > uvicorn.log 2>&1 &
+          sleep 5  # Give the server time to start
         working-directory: HFCTM-II-ORION
+
+      - name: Wait for API to Start
+        run: |
+          echo "Waiting for FastAPI server..."
+          sleep 5
+          curl --retry 5 --retry-delay 5 --retry-connrefused http://localhost:8080/docs || exit 1
 
       - name: Run Tests
         run: pytest --disable-warnings --maxfail=5 --tb=short
