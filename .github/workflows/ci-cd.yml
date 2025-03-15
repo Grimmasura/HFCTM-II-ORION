@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
 
       - name: Set Up Python
         uses: actions/setup-python@v5
@@ -23,7 +25,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Set PYTHONPATH
@@ -32,14 +34,12 @@ jobs:
       - name: Start FastAPI Server
         run: |
           nohup uvicorn orion_api.main:app --host 0.0.0.0 --port 8080 > uvicorn.log 2>&1 &
-          sleep 5  # Give the server time to start
+          for i in {1..10}; do
+            curl --silent --fail http://localhost:8080/docs && break
+            echo "Waiting for API to start..."
+            sleep 3
+          done
         working-directory: HFCTM-II-ORION
-
-      - name: Wait for API to Start
-        run: |
-          echo "Waiting for FastAPI server..."
-          sleep 5
-          curl --retry 5 --retry-delay 5 --retry-connrefused http://localhost:8080/docs || exit 1
 
       - name: Run Tests
         run: pytest --disable-warnings --maxfail=5 --tb=short
