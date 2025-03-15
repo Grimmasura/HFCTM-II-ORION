@@ -1,0 +1,87 @@
+name: AI GitHub Automation
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  issues:
+    types: [opened]
+  push:
+    branches:
+      - main
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run AI Commit Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: python commit_file.py
+
+  auto-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run AI Pull Request Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: python create_pull_request.py
+
+  auto-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run AI Issue Handler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: python respond_to_issue.py
+
+  auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run AI Auto-Merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: python auto_merge_pr.py
