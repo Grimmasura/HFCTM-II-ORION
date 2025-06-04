@@ -4,6 +4,11 @@ from git import Repo
 
 # Initialize the repo
 repo = Repo(os.getcwd())
+BRANCH = "main"
+
+if repo.head.is_detached:
+    # Ensure we are on the desired branch when running in detached HEAD state
+    repo.git.checkout(BRANCH)
 
 # Create a test file
 file_path = "test_ai_commit.txt"
@@ -24,7 +29,7 @@ if token:
         authed_url = original_url.replace("https://", f"https://{token}@")
         origin.set_url(authed_url)
     try:
-        origin.push()
+        origin.push(refspec=f"HEAD:{BRANCH}")
         print("✅ File committed and pushed successfully.")
     finally:
         if original_url:
