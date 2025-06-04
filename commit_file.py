@@ -6,9 +6,8 @@ from git import Repo
 repo = Repo(os.getcwd())
 BRANCH = "main"
 
-if repo.head.is_detached:
-    # Ensure we are on the desired branch when running in detached HEAD state
-    repo.git.checkout(BRANCH)
+# Always ensure we are on the desired branch
+repo.git.checkout(BRANCH)
 
 # Create a test file
 file_path = "test_ai_commit.txt"
