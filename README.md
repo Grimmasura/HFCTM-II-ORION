@@ -33,3 +33,8 @@ Run recursive AI performance tests:
 ```bash
 python benchmarks/benchmark_recursive.py
 ```
+
+## Automation Scripts
+Scripts such as `commit_file.py` can automatically commit changes. To push to a
+remote repository these scripts require a `GITHUB_TOKEN` environment variable.
+Without the token they will create the commit locally and skip the push step.
