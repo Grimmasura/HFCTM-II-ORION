@@ -10,7 +10,7 @@ from orion_api.routers import (
 app = FastAPI(title="O.R.I.O.N. ∞ API")
 
 # Include routers from orion_api
-app.include_router(recursive_ai.router, prefix="/recursive-ai", tags=["Recursive AI"])
+app.include_router(recursive_ai.router, prefix="/api/v1/recursive_ai", tags=["Recursive AI"])
 app.include_router(quantum_sync.router, prefix="/quantum-sync", tags=["Quantum Sync"])
 app.include_router(recursive_trust.router, prefix="/trust", tags=["Recursive Trust"])
 app.include_router(egregore_defense.router, prefix="/egregore", tags=["Egregore Defense"])
