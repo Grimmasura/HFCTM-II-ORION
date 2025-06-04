@@ -1,5 +1,10 @@
-import pytest
+import os
+import sys
 from fastapi.testclient import TestClient
+
+# Ensure project root is on sys.path
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 from orion_api.main import app
 
 client = TestClient(app)
