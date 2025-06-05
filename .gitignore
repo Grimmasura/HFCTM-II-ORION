@@ -13,3 +13,10 @@ models/*.zip
 # Ignore logs and cache files
 logs/
 cache/
+
+# Ignore pytest cache
+.pytest_cache/
+
+# Ignore auto-generated commit artifacts
+test_ai_commit.txt
+commit_file.py
