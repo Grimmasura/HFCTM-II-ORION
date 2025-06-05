@@ -13,3 +13,6 @@ models/*.zip
 # Ignore logs and cache files
 logs/
 cache/
+
+# Ignore pytest cache
+.pytest_cache/
