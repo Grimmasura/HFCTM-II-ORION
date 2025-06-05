@@ -36,7 +36,6 @@ jobs:
         run: |
           nohup uvicorn orion_api.main:app --host 0.0.0.0 --port 8080 > uvicorn.log 2>&1 &
           sleep 5  # Give the server time to start
-        working-directory: HFCTM-II-ORION
 
       - name: Wait for API to Start
         run: |
@@ -49,4 +48,3 @@ jobs:
 
       - name: Run Tests
         run: pytest --disable-warnings --maxfail=5 --tb=short
-        working-directory: HFCTM-II-ORION
