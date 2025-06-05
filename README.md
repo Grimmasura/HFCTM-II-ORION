@@ -43,6 +43,11 @@ pytest -q
 The pinned `httpx` version has been tested with FastAPI's `TestClient` to ensure
 API routes load correctly.
 
+## Dependency Notes
+The repository previously listed Hugging Face's `transformers` library in
+`requirements.txt`, but no modules actually used it. The dependency has been
+removed to keep installation lightweight.
+
 ## Automation Scripts
 Scripts such as `commit_file.py` can automatically commit changes. To push to a
 remote repository these scripts require a `GITHUB_TOKEN` environment variable.
