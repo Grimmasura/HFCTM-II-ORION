@@ -4,10 +4,8 @@ from git import Repo
 
 # Initialize the repo
 repo = Repo(os.getcwd())
-BRANCH = "main"
-
-# Always ensure we are on the desired branch
-repo.git.checkout(BRANCH)
+# Use the current branch unless a target branch is specified
+BRANCH = os.getenv("TARGET_BRANCH", repo.active_branch.name)
 
 # Create a test file
 file_path = "test_ai_commit.txt"
