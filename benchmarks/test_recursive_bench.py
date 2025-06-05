@@ -1,5 +1,6 @@
 import os
 import sys
+from fastapi.testclient import TestClient
 
 
 # Ensure project root is on sys.path

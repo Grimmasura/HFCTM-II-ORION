@@ -18,5 +18,3 @@ cache/
 .pytest_cache/
 
 # Ignore auto-generated commit artifacts
-test_ai_commit.txt
-commit_file.py
