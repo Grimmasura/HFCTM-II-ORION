@@ -12,7 +12,8 @@ repo.git.checkout(BRANCH)
 # Create a test file
 file_path = "test_ai_commit.txt"
 with open(file_path, "w") as f:
-    f.write(f"AI-generated commit at {datetime.datetime.now()}")
+    # Include a trailing newline to avoid EOF issues
+    f.write(f"AI-generated commit at {datetime.datetime.now()}\n")
 
 # Add, commit, and push
 repo.git.add(file_path)
