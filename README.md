@@ -40,6 +40,8 @@ Install minimal test dependencies and run the unit tests:
 pip install fastapi==0.115.11 httpx==0.27.0 pytest==8.0.0
 pytest -q
 ```
+The pinned `httpx` version has been tested with FastAPI's `TestClient` to ensure
+API routes load correctly.
 
 ## Automation Scripts
 Scripts such as `commit_file.py` can automatically commit changes. To push to a
