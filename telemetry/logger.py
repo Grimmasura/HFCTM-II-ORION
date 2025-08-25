@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Iterable, Optional
 
 from .schema import TelemetryRecord
 from .transports import TelemetryTransport
@@ -20,7 +20,7 @@ class HashChainLogger:
         self.prev_hash: Optional[str] = None
         self.redact_fields = set(redact_fields or [])
 
-    def _apply_redaction(self, data: Dict[str, Any]) -> list[str]:
+    def _apply_redaction(self, data: dict[str, Any]) -> list[str]:
         redacted = []
         for field in self.redact_fields:
             if field in data:
@@ -34,10 +34,10 @@ class HashChainLogger:
         step: int,
         model_id: str,
         version_id: str,
-        detector_metrics: Dict[str, float],
+        detector_metrics: dict[str, float],
         action: Any,
     ) -> TelemetryRecord:
-        record_dict: Dict[str, Any] = {
+        record_dict: dict[str, Any] = {
             "step": step,
             "model_id": model_id,
             "version_id": version_id,

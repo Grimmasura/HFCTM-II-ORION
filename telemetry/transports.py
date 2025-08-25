@@ -41,7 +41,7 @@ class FileTransport(TelemetryTransport):
 class HTTPTransport(TelemetryTransport):
     """Transport that POSTs records to an HTTP endpoint."""
 
-    def __init__(self, url: str, headers: Optional[dict] = None):
+    def __init__(self, url: str, headers: Optional[dict[str, str]] = None):
         self.url = url
         self.headers = headers or {"Content-Type": "application/json"}
 
