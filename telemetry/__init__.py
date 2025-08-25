@@ -1,14 +1,9 @@
-from .schema import TelemetryRecord
-from .logger import HashChainLogger
-from .transports import (
-    TelemetryTransport,
-    StdoutTransport,
-    FileTransport,
-    HTTPTransport,
-)
+from .schema import TelemetryEvent
+from .hash_chain_logger import HashChainLogger
+from .transports import TelemetryTransport, StdoutTransport, FileTransport, HTTPTransport
 
 __all__ = [
-    "TelemetryRecord",
+    "TelemetryEvent",
     "HashChainLogger",
     "TelemetryTransport",
     "StdoutTransport",

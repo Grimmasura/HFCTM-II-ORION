@@ -6,14 +6,14 @@ from typing import Optional
 
 import requests
 
-from .schema import TelemetryRecord
+from .schema import TelemetryEvent
 
 
 class TelemetryTransport(ABC):
     """Interface for telemetry transports."""
 
     @abstractmethod
-    def send(self, record: TelemetryRecord) -> None:
+    def send(self, record: TelemetryEvent) -> None:
         """Send a telemetry record."""
         raise NotImplementedError
 
@@ -21,7 +21,7 @@ class TelemetryTransport(ABC):
 class StdoutTransport(TelemetryTransport):
     """Transport that prints records to STDOUT."""
 
-    def send(self, record: TelemetryRecord) -> None:  # pragma: no cover - trivial
+    def send(self, record: TelemetryEvent) -> None:  # pragma: no cover - trivial
         print(record.model_dump_json())
 
 
@@ -31,7 +31,7 @@ class FileTransport(TelemetryTransport):
     def __init__(self, path: str | pathlib.Path):
         self.path = pathlib.Path(path)
 
-    def send(self, record: TelemetryRecord) -> None:
+    def send(self, record: TelemetryEvent) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a", encoding="utf-8") as f:
             f.write(record.model_dump_json())
@@ -45,5 +45,5 @@ class HTTPTransport(TelemetryTransport):
         self.url = url
         self.headers = headers or {"Content-Type": "application/json"}
 
-    def send(self, record: TelemetryRecord) -> None:  # pragma: no cover - side effects
+    def send(self, record: TelemetryEvent) -> None:  # pragma: no cover - side effects
         requests.post(self.url, json=record.model_dump(), headers=self.headers)

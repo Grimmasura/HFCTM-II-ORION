@@ -4,7 +4,7 @@ import hashlib
 import json
 from typing import Any, Iterable, Optional
 
-from .schema import TelemetryRecord
+from .schema import TelemetryEvent
 from .transports import TelemetryTransport
 
 
@@ -33,14 +33,14 @@ class HashChainLogger:
         *,
         step: int,
         model_id: str,
-        version_id: str,
+        model_version: str,
         detector_metrics: dict[str, float],
         action: Any,
-    ) -> TelemetryRecord:
+    ) -> TelemetryEvent:
         record_dict: dict[str, Any] = {
             "step": step,
             "model_id": model_id,
-            "version_id": version_id,
+            "model_version": model_version,
             "detector_metrics": detector_metrics,
             "action": action,
             "prev_hash": self.prev_hash,
@@ -50,7 +50,7 @@ class HashChainLogger:
         new_hash = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
         record_dict["hash_value"] = new_hash
         record_dict["redacted_fields"] = redacted_fields
-        record = TelemetryRecord(**record_dict)
+        record = TelemetryEvent(**record_dict)
         self.prev_hash = new_hash
         for transport in self.transports:
             transport.send(record)

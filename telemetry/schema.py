@@ -6,15 +6,13 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 
-class TelemetryRecord(BaseModel):
+class TelemetryEvent(BaseModel):
     """Telemetry schema for per-step logging."""
 
     step: int
-    timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     model_id: str
-    version_id: str
+    model_version: str
     detector_metrics: dict[str, float] = Field(default_factory=dict)
     action: Any = None
     prev_hash: Optional[str] = None

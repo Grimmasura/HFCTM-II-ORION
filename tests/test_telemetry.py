@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from telemetry.logger import HashChainLogger
+from telemetry.hash_chain_logger import HashChainLogger
 from telemetry.transports import FileTransport
 
 
@@ -13,14 +13,14 @@ def test_hash_chain_and_redaction(tmp_path: Path):
     r1 = logger.log(
         step=1,
         model_id="modelA",
-        version_id="v1",
+        model_version="v1",
         detector_metrics={"acc": 0.9},
         action="sensitive",
     )
     r2 = logger.log(
         step=2,
         model_id="modelA",
-        version_id="v1",
+        model_version="v1",
         detector_metrics={"acc": 0.8},
         action="secret",
     )
