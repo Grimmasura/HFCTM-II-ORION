@@ -1,5 +1,6 @@
 import os
 import urllib.request
+from models.stability_core import stability_core
 
 try:
     from stable_baselines3 import PPO
@@ -37,13 +38,28 @@ if PPO is not None:
 
 
 def recursive_model_live(query: str, depth: int):
-    """Recursively generate a response for the given query."""
+    """Recursively generate a response for the given query.
+
+    The query is first streamed through ``StabilityCore`` which yields
+    generation steps. Each step is inspected for detector outputs and the
+    response is routed to a refusal policy when unsafe signals are present.
+    """
+
+    inference = stability_core.generate(query)
+    processed_tokens = []
+    for step in inference:
+        if step.get("chi_Eg") == 1 or step.get("lambda", 0) > 0:
+            return "Response refused by safety policy."
+        processed_tokens.append(step["token"])
+
+    processed_query = " ".join(processed_tokens)
+
     if agent is None:
         optimal_depth = depth
     else:
         optimal_depth = agent.predict(depth)[0]
     if optimal_depth <= 0:
-        return f"Base case: {query}"
-    response = f"Recursive Expansion of '{query}' at depth {optimal_depth}"
-    return response + "\n" + recursive_model_live(query, optimal_depth - 1)
+        return f"Base case: {processed_query}"
+    response = f"Recursive Expansion of '{processed_query}' at depth {optimal_depth}"
+    return response + "\n" + recursive_model_live(processed_query, optimal_depth - 1)
 

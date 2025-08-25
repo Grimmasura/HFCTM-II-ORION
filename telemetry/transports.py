@@ -1,3 +1,5 @@
+"""Transport adapters for telemetry dispatch."""
+
 from __future__ import annotations
 
 import pathlib
@@ -22,7 +24,7 @@ class StdoutTransport(TelemetryTransport):
     """Transport that prints records to STDOUT."""
 
     def send(self, record: TelemetryRecord) -> None:  # pragma: no cover - trivial
-        print(record.model_dump_json())
+        print(record.model_dump_json(exclude_unset=True))
 
 
 class FileTransport(TelemetryTransport):
@@ -34,7 +36,7 @@ class FileTransport(TelemetryTransport):
     def send(self, record: TelemetryRecord) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a", encoding="utf-8") as f:
-            f.write(record.model_dump_json())
+            f.write(record.model_dump_json(exclude_unset=True))
             f.write("\n")
 
 
@@ -46,4 +48,7 @@ class HTTPTransport(TelemetryTransport):
         self.headers = headers or {"Content-Type": "application/json"}
 
     def send(self, record: TelemetryRecord) -> None:  # pragma: no cover - side effects
-        requests.post(self.url, json=record.model_dump(), headers=self.headers)
+        requests.post(
+            self.url, json=record.model_dump(exclude_unset=True), headers=self.headers
+        )
+

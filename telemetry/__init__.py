@@ -1,3 +1,5 @@
+"""Telemetry package providing structured logging with hash chaining."""
+
 from .schema import TelemetryRecord
 from .hash_chain_logger import HashChainLogger
 from .transports import TelemetryTransport, StdoutTransport, FileTransport, HTTPTransport

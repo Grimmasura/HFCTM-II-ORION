@@ -1,0 +1,8 @@
+precision_modes:
+  - fp32
+  - bf16
+intervals:
+  K: 1024
+  M: 2048
+sentinel_count: 4
+latency_budget_ms: 50
