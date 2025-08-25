@@ -19,8 +19,12 @@ import logging
 import os
 import random
 
+
 # Configure a basic logger for the module
 logger = logging.getLogger(__name__)
+
+# Deterministic random generator for reproducible metrics
+_RNG = random.Random(0)
 
 # KPIs that every experiment should report
 KPIS = [
@@ -55,7 +59,7 @@ def _generate_metrics() -> Dict[str, float]:
     Returns values in [0, 1) to keep things deterministic across tests.
     """
 
-    return {key: random.random() for key in KPIS}
+    return {key: _RNG.random() for key in KPIS}
 
 
 def _simple_pass_fail(metrics: Dict[str, float]) -> bool:
