@@ -1,1 +1,0 @@
-# Core recursive intelligence model.

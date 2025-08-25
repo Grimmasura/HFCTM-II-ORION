@@ -1,1 +1,0 @@
-# Recursive trust verification.
