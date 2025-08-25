@@ -6,18 +6,26 @@ from pathlib import Path
 import json
 from typing import Iterable
 
+try:  # pragma: no cover - optional dependency
+    import yaml
+except Exception:  # pragma: no cover - fallback when PyYAML missing
+    yaml = None
+
 CONFIG_DIR = Path(__file__).resolve().parent.parent / "configs"
 
 
 def load_config(name: str) -> dict:
     """Load a hardware configuration from the configs directory.
 
-    The configuration files are stored as YAML but use a subset of YAML that is
-    also valid JSON, allowing us to parse them without additional dependencies.
+    The configuration files are written in YAML.  If :mod:`PyYAML` is available
+    we parse them with :func:`yaml.safe_load`; otherwise we fall back to the
+    JSON loader since our configs are JSON-compatible.
     """
 
     path = CONFIG_DIR / f"{name}.yaml"
     with path.open("r", encoding="utf-8") as fh:
+        if yaml is not None:
+            return yaml.safe_load(fh)
         return json.load(fh)
 
 
