@@ -6,6 +6,7 @@ from orion_api.routers import (
     egregore_defense,
     manifold_router,
 )
+from models.stability_core import stability_core
 
 app = FastAPI(title="O.R.I.O.N. ∞ API")
 
@@ -19,3 +20,15 @@ app.include_router(manifold_router.router, prefix="/manifold", tags=["Manifold R
 @app.get("/")
 async def root():
     return {"message": "Welcome to O.R.I.O.N. ∞ API"}
+
+
+@app.get("/health")
+async def health() -> dict:
+    """Simple service liveness endpoint."""
+    return stability_core.health()
+
+
+@app.get("/telemetry")
+async def telemetry() -> dict:
+    """Expose a snapshot of recent inference telemetry."""
+    return stability_core.snapshot()

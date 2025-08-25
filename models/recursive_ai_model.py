@@ -1,6 +1,8 @@
 import os
 import urllib.request
 
+from models.stability_core import stability_core
+
 try:
     from stable_baselines3 import PPO
     import gym
@@ -34,10 +36,20 @@ if PPO is not None:
     print("📥 Loading model...")
     agent = PPO.load(MODEL_PATH)
     print("✅ Model loaded successfully.")
+ 
 
+def recursive_model_live(query: str, depth: int, chi_Eg: int = 0, lambda_: float = 0.0):
+    """Recursively generate a response for the given query.
 
-def recursive_model_live(query: str, depth: int):
-    """Recursively generate a response for the given query."""
+    Each generation step is tracked by :class:`StabilityCore` which can
+    route to a refusal policy when detector outputs flag unsafe content.
+    """
+
+    # Wrap the generation steps for telemetry and policy enforcement
+    for _ in range(depth):
+        if not stability_core.track({"chi_Eg": chi_Eg, "lambda": lambda_}):
+            return "Refusal: safety policy triggered"
+
     if agent is None:
         optimal_depth = depth
     else:
@@ -45,5 +57,5 @@ def recursive_model_live(query: str, depth: int):
     if optimal_depth <= 0:
         return f"Base case: {query}"
     response = f"Recursive Expansion of '{query}' at depth {optimal_depth}"
-    return response + "\n" + recursive_model_live(query, optimal_depth - 1)
+    return response + "\n" + recursive_model_live(query, optimal_depth - 1, chi_Eg, lambda_)
 
