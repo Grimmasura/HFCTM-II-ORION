@@ -49,13 +49,15 @@ def EgAudit(message: str) -> str:
 
 
 def EgMitigate(level: str) -> Dict[str, Any]:
-    """Perform mitigation action and audit it."""
+    """Perform mitigation action (warn, stabilize, escalate) and audit it."""
     EgAudit(f"mitigation:{level}")
     return {"action": level}
 
 
-def EgDetect(signal: np.ndarray, matrix: np.ndarray, other: np.ndarray) -> Dict[str, float]:
-    """Compute metrics and run composite detector."""
+def EgDetect(
+    signal: np.ndarray, matrix: np.ndarray, other: np.ndarray
+) -> Dict[str, Any]:
+    """Compute metrics, run detector, and return metrics and action."""
     metrics = {
         "phase_order": phase_order(signal),
         "spectral_capacity": spectral_capacity(matrix),
@@ -66,7 +68,7 @@ def EgDetect(signal: np.ndarray, matrix: np.ndarray, other: np.ndarray) -> Dict[
     action = _detector.check(metrics)
     if action:
         EgMitigate(action)
-    return metrics
+    return {"metrics": metrics, "action": action}
 
 
 def EgState() -> str:
