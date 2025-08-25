@@ -1,4 +1,4 @@
-"""Stability core package with modular heads."""
+"""Stability core package exposing modular monitoring heads."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,11 +7,11 @@ from typing import Dict, Tuple
 import numpy as np
 from pydantic import BaseModel
 
-from .lambda_monitor import LyapunovConfig, LyapunovMonitor
-from .damping import DampingConfig, AdaptiveDamping
 from .chiral import ChiralConfig, ChiralInversion
+from .damping import AdaptiveDamping, DampingConfig
+from .e8_anchor import E8Anchor, E8Config
+from .lambda_monitor import LyapunovConfig, LyapunovMonitor
 from .wavelet import WaveletConfig, WaveletScanner
-from .e8_anchor import E8Config, E8Anchor
 
 try:  # Optional dependency
     import yaml
@@ -75,16 +75,16 @@ class StabilityCore:
 
 
 __all__ = [
-    "LyapunovConfig",
-    "LyapunovMonitor",
-    "DampingConfig",
     "AdaptiveDamping",
     "ChiralConfig",
     "ChiralInversion",
-    "WaveletConfig",
-    "WaveletScanner",
-    "E8Config",
+    "DampingConfig",
     "E8Anchor",
+    "E8Config",
+    "LyapunovConfig",
+    "LyapunovMonitor",
     "StabilityConfig",
     "StabilityCore",
+    "WaveletConfig",
+    "WaveletScanner",
 ]
