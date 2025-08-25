@@ -49,7 +49,9 @@ class StabilityCore:
         self.wavelet = WaveletScanner(self.config.wavelet)
         self.e8 = E8Anchor(self.config.e8)
 
-    def step(self, state: np.ndarray, latents: np.ndarray | None = None) -> Tuple[np.ndarray, Dict[str, object]]:
+    def step(
+        self, state: np.ndarray, latents: np.ndarray | None = None
+    ) -> Tuple[np.ndarray, Dict[str, object]]:
         """Run a single update step.
 
         Parameters
@@ -88,3 +90,4 @@ __all__ = [
     "WaveletConfig",
     "WaveletScanner",
 ]
+
