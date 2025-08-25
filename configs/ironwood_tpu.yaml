@@ -1,0 +1,7 @@
+{
+  "device": "ironwood_tpu",
+  "precision_modes": ["int8", "bf16"],
+  "intervals": {"K": 1024, "M": 1},
+  "sentinel_count": 3,
+  "latency_budget_ms": 50
+}

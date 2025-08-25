@@ -1,0 +1,7 @@
+{
+  "device": "majorana1_qpu",
+  "precision_modes": ["qfloat16"],
+  "intervals": {"K": 2048, "M": 0},
+  "sentinel_count": 5,
+  "latency_budget_ms": 120
+}
