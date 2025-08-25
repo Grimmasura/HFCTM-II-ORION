@@ -37,3 +37,4 @@ __all__ = [
     "WaveletScanner",
     "load_config",
 ]
+
