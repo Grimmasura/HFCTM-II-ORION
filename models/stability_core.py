@@ -38,7 +38,3 @@ class StabilityCore:
     def health(self):
         """Basic health check reporting number of tracked steps."""
         return {"status": "ok", "steps_tracked": len(self.history)}
-
-
-# Global core instance shared across the service
-stability_core = StabilityCore()

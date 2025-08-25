@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from orion_api.routers import (
     recursive_ai,
     quantum_sync,
@@ -6,9 +6,10 @@ from orion_api.routers import (
     egregore_defense,
     manifold_router,
 )
-from models.stability_core import stability_core
+from models.stability_core import StabilityCore
 
 app = FastAPI(title="O.R.I.O.N. ∞ API")
+app.state.stability_core = StabilityCore()
 
 # Include routers from orion_api
 app.include_router(recursive_ai.router, prefix="/api/v1/recursive_ai", tags=["Recursive AI"])
@@ -23,12 +24,12 @@ async def root():
 
 
 @app.get("/health")
-async def health() -> dict:
+async def health(request: Request) -> dict:
     """Simple service liveness endpoint."""
-    return stability_core.health()
+    return request.app.state.stability_core.health()
 
 
 @app.get("/telemetry")
-async def telemetry() -> dict:
+async def telemetry(request: Request) -> dict:
     """Expose a snapshot of recent inference telemetry."""
-    return stability_core.snapshot()
+    return request.app.state.stability_core.snapshot()

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel
 from models.recursive_ai_model import recursive_model_live
 
@@ -13,13 +13,14 @@ class RecursiveRequest(BaseModel):
 
 
 @router.post("/infer")
-async def recursive_infer(request: RecursiveRequest):
+async def recursive_infer(payload: RecursiveRequest, request: Request):
     """Run the recursive model with telemetry and safety guards."""
     response = recursive_model_live(
-        request.query,
-        request.depth,
-        chi_Eg=request.chi_Eg,
-        lambda_=request.lambda_,
+        payload.query,
+        payload.depth,
+        request.app.state.stability_core,
+        chi_Eg=payload.chi_Eg,
+        lambda_=payload.lambda_,
     )
-    return {"response": response, "depth": request.depth}
+    return {"response": response, "depth": payload.depth}
 
