@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime, timezone
 from typing import Any, Iterable, Optional
 
-from .schema import TelemetryEvent
+from .schema import TelemetryRecord
 from .transports import TelemetryTransport
 
 
@@ -35,10 +36,11 @@ class HashChainLogger:
         model_id: str,
         model_version: str,
         detector_metrics: dict[str, float],
-        action: Any,
-    ) -> TelemetryEvent:
+        action: Any | None,
+    ) -> TelemetryRecord:
         record_dict: dict[str, Any] = {
             "step": step,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "model_id": model_id,
             "model_version": model_version,
             "detector_metrics": detector_metrics,
@@ -50,7 +52,7 @@ class HashChainLogger:
         new_hash = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
         record_dict["hash_value"] = new_hash
         record_dict["redacted_fields"] = redacted_fields
-        record = TelemetryEvent(**record_dict)
+        record = TelemetryRecord(**record_dict)
         self.prev_hash = new_hash
         for transport in self.transports:
             transport.send(record)
