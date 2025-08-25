@@ -1,4 +1,4 @@
-"""Telemetry package providing structured logging with hash chaining."""
+"""Telemetry package providing structured logging with hash chaining and transport adapters."""
 
 from .schema import TelemetryRecord
 from .hash_chain_logger import HashChainLogger
