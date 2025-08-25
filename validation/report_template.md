@@ -1,33 +1,16 @@
 # Validation Report Template
 
-Use this template to summarize experiment outcomes. Replace placeholders with
-actual results and observations.
+Use this template to summarize experiment outcomes. Replace placeholders with actual results and observations. Summarise the outcome of validation experiments S1–S6. Populate the table below with the key metrics and qualitative notes from each run.
 
-## Decision Matrix
+| Experiment | Dataset | Pass/Fail | Δλ | Recovery Time | AUC | EER | v̂_r | FP/TPR Drift | QoS Δ | Overhead | Notes | Next Steps |
+|-----------|---------|-----------|---|---------------|-----|-----|-----|---------------|--------|----------|-------|-----------|
+| S1 – E8 anchor ablation | | | | | | | | | | | | |
+| S2 – Chiral inversion efficacy | | | | | | | | | | | | |
+| S3 – Cross-architecture calibration | | | | | | | | | | | | |
+| S4 – Evasion robustness | | | | | | | | | | | | |
+| S5 – Overhead profiling | | | | | | | | | | | | |
+| S6 – Integration safety | | | | | | | | | | | | |
 
-| Experiment | Status | Notes | Next Steps |
-|------------|--------|-------|------------|
-| S1 E8 anchor ablation | TBD |  |  |
-| S2 Chiral inversion efficacy | TBD |  |  |
-| S3 Cross-architecture calibration | TBD |  |  |
-| S4 Evasion robustness | TBD |  |  |
-| S5 Overhead profiling | TBD |  |  |
-| S6 Integration safety | TBD |  |  |
-
-## KPIs
-
-Record the following key performance indicators for each experiment:
-
-- Δλ
-- Recovery time
-- AUC/EER
-- Escape velocity `v̂_r`
-- FP/TPR drift
-- QoS delta
-- Overhead
-
-## Summary
-
-- Overall status:
-- Notes:
-- Next steps:
+**Notes:**
+- *Pass/Fail* should reflect thresholds agreed upon by the evaluation team.
+- *Next Steps* may include follow-up experiments, mitigation plans, or deployment recommendations.
