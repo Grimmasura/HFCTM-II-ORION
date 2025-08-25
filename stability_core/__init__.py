@@ -1,4 +1,11 @@
-"""Stability core package exposing modular monitoring heads."""
+"""Stability core package exposing modular monitoring heads.
+
+This package wires together optional stability monitoring components such as
+Lyapunov divergence tracking, adaptive damping, chiral inversion, wavelet
+anomaly scanning and an E8 lattice projection.  Each head can be invoked on
+its own for targeted testing, while :class:`StabilityCore` orchestrates them in
+sequence.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -76,18 +83,20 @@ class StabilityCore:
         return state, metrics
 
 
-__all__ = [
-    "AdaptiveDamping",
-    "ChiralConfig",
-    "ChiralInversion",
-    "DampingConfig",
-    "E8Anchor",
-    "E8Config",
-    "LyapunovConfig",
-    "LyapunovMonitor",
-    "StabilityConfig",
-    "StabilityCore",
-    "WaveletConfig",
-    "WaveletScanner",
-]
+__all__ = sorted(
+    [
+        "AdaptiveDamping",
+        "ChiralConfig",
+        "ChiralInversion",
+        "DampingConfig",
+        "E8Anchor",
+        "E8Config",
+        "LyapunovConfig",
+        "LyapunovMonitor",
+        "StabilityConfig",
+        "StabilityCore",
+        "WaveletConfig",
+        "WaveletScanner",
+    ]
+)
 
