@@ -81,10 +81,4 @@ __all__ = [
     "EgState",
     "EgMitigate",
     "EgAudit",
-    "CompositeDetector",
-    "phase_order",
-    "spectral_capacity",
-    "mutual_information",
-    "wavelet_burst_energy",
-    "entropy_slope",
 ]
