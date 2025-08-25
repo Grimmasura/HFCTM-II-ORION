@@ -34,6 +34,12 @@ Run recursive AI performance tests:
 python benchmarks/benchmark_recursive.py
 ```
 
+## Validation Experiments
+Run post-training validation experiments and build a KPI decision matrix:
+```bash
+python -m validation.run_validation --dataset S1=TruthfulQA --dataset default=HumanEval --output validation/results/decision_matrix.csv
+```
+
 ## Testing
 Install minimal test dependencies and run the unit tests:
 ```bash
