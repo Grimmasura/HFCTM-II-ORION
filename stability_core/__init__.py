@@ -1,10 +1,12 @@
+"""Convenience re-exports for stability core components."""
+
 from .config import (
+    StabilityConfig,
     LambdaConfig,
     DampingConfig,
     ChiralConfig,
     WaveletConfig,
     E8Config,
-    StabilityConfig,
     load_config,
 )
 from .core import StabilityCore
@@ -14,19 +16,19 @@ from .chiral import ChiralInversion
 from .wavelet import WaveletScanner
 from .e8_anchor import E8Anchor
 
-__all__ = [
-    "StabilityCore",
-    "load_config",
-    "StabilityConfig",
-    "LambdaConfig",
-    "DampingConfig",
-    "ChiralConfig",
-    "WaveletConfig",
-    "E8Config",
-    "LambdaMonitor",
+__all__ = (
     "AdaptiveDamping",
+    "ChiralConfig",
     "ChiralInversion",
-    "WaveletScanner",
+    "DampingConfig",
     "E8Anchor",
-]
+    "E8Config",
+    "LambdaConfig",
+    "LambdaMonitor",
+    "StabilityConfig",
+    "StabilityCore",
+    "WaveletConfig",
+    "WaveletScanner",
+    "load_config",
+)
 
