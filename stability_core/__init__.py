@@ -1,22 +1,28 @@
-"""Convenience re-exports for stability core components."""
+"""Stability core package exports.
 
+This module provides convenience re-exports for configuration models, processing
+heads, and the orchestrating :class:`StabilityCore`. Exposing these symbols at
+the package level simplifies imports for consumers and reduces merge conflicts
+with ``main`` when new components are introduced.
+"""
+
+from .chiral import ChiralInversion
 from .config import (
-    StabilityConfig,
-    LambdaConfig,
-    DampingConfig,
     ChiralConfig,
-    WaveletConfig,
+    DampingConfig,
     E8Config,
+    LambdaConfig,
+    StabilityConfig,
+    WaveletConfig,
     load_config,
 )
 from .core import StabilityCore
-from .lambda_monitor import LambdaMonitor
 from .damping import AdaptiveDamping
-from .chiral import ChiralInversion
-from .wavelet import WaveletScanner
 from .e8_anchor import E8Anchor
+from .lambda_monitor import LambdaMonitor
+from .wavelet import WaveletScanner
 
-__all__ = (
+__all__ = [
     "AdaptiveDamping",
     "ChiralConfig",
     "ChiralInversion",
@@ -30,4 +36,4 @@ __all__ = (
     "WaveletConfig",
     "WaveletScanner",
     "load_config",
-)
+]
