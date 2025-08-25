@@ -8,6 +8,11 @@ from .config import (
     load_config,
 )
 from .core import StabilityCore
+from .lambda_monitor import LambdaMonitor
+from .damping import AdaptiveDamping
+from .chiral import ChiralInversion
+from .wavelet import WaveletScanner
+from .e8_anchor import E8Anchor
 
 __all__ = [
     "StabilityCore",
@@ -18,4 +23,10 @@ __all__ = [
     "ChiralConfig",
     "WaveletConfig",
     "E8Config",
+    "LambdaMonitor",
+    "AdaptiveDamping",
+    "ChiralInversion",
+    "WaveletScanner",
+    "E8Anchor",
 ]
+
