@@ -1,0 +1,10 @@
+lambda_monitor:
+  threshold: 1.0
+damping:
+  base: 0.1
+chiral:
+  invert: true
+wavelet:
+  threshold: 0.5
+e8_anchor:
+  enabled: false
