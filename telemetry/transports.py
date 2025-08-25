@@ -46,4 +46,4 @@ class HTTPTransport(TelemetryTransport):
         self.headers = headers or {"Content-Type": "application/json"}
 
     def send(self, record: TelemetryRecord) -> None:  # pragma: no cover - side effects
-        requests.post(self.url, data=record.model_dump_json(), headers=self.headers)
+        requests.post(self.url, json=record.model_dump(), headers=self.headers)
