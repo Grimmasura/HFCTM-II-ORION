@@ -2,65 +2,68 @@ import numpy as np
 
 
 def phase_order(phases: np.ndarray) -> float:
-    """Compute Kuramoto phase order parameter r(t).
-
-    Parameters
-    ----------
-    phases: np.ndarray
-        Array of oscillator phases in radians.
-    Returns
-    -------
-    float
-        Order parameter magnitude in [0,1].
-    """
+    """Kuramoto order parameter r(t) for array of phase angles."""
+    phases = np.asarray(phases)
     if phases.size == 0:
         return 0.0
-    order = np.abs(np.sum(np.exp(1j * phases)) / phases.size)
-    return float(order)
+    return np.abs(np.exp(1j * phases).mean()).item()
 
 
-def spectral_capacity(matrix: np.ndarray) -> float:
-    """Largest eigenvalue (spectral capacity) of a matrix."""
-    if matrix.size == 0:
-        return 0.0
-    vals = np.linalg.eigvals(matrix)
+def spectral_capacity(signal: np.ndarray) -> float:
+    """Largest eigenvalue (lambda_max) of covariance matrix."""
+    signal = np.asarray(signal)
+    if signal.ndim == 1:
+        cov = np.var(signal)
+        return float(cov)
+    cov = np.cov(signal)
+    vals = np.linalg.eigvals(cov)
     return float(np.max(np.real(vals)))
 
 
 def mutual_information(x: np.ndarray, y: np.ndarray, bins: int = 32) -> float:
-    """Estimate mutual information between two signals."""
-    if x.size == 0 or y.size == 0:
-        return 0.0
-    c_xy = np.histogram2d(x, y, bins)[0]
+    """Estimate mutual information between two signals using histograms."""
+    x = np.asarray(x)
+    y = np.asarray(y)
+    c_xy, _, _ = np.histogram2d(x, y, bins)
     p_xy = c_xy / np.sum(c_xy)
-    p_x = np.sum(p_xy, axis=1)[:, None]
-    p_y = np.sum(p_xy, axis=0)[None, :]
-    nz = p_xy > 0
-    mi = np.sum(p_xy[nz] * np.log(p_xy[nz] / (p_x * p_y)[nz]))
+    p_x = np.sum(p_xy, axis=1, keepdims=True)
+    p_y = np.sum(p_xy, axis=0, keepdims=True)
+    nzs = p_xy > 0
+    mi = np.sum(p_xy[nzs] * np.log(p_xy[nzs] / (p_x @ p_y)[nzs]))
     return float(mi)
 
 
-def wavelet_burst_energy(signal: np.ndarray, width: int = 5) -> float:
-    """Compute energy of a Morlet wavelet burst in the signal."""
-    if signal.size == 0:
-        return 0.0
-    t = np.arange(-5 * width, 5 * width)
-    morlet = np.exp(-t**2 / (2 * width**2)) * np.cos(5 * t)
-    conv = np.convolve(signal, morlet, mode="same")
-    return float(np.sum(conv ** 2))
+def _morlet(length: int, width: float = 5.0) -> np.ndarray:
+    t = np.linspace(-2 * np.pi, 2 * np.pi, length)
+    wavelet = np.exp(1j * t) * np.exp(-(t ** 2) / (2 * width ** 2))
+    return wavelet / np.sqrt(np.sum(np.abs(wavelet) ** 2))
 
 
-def entropy_slope(signal: np.ndarray, window: int = 50) -> float:
-    """Slope of Shannon entropy over sliding windows."""
-    n = signal.size
-    if n < window * 2:
+def wavelet_burst_energy(signal: np.ndarray, width: float = 5.0) -> float:
+    """Approximate burst energy using a Morlet wavelet convolution."""
+    signal = np.asarray(signal)
+    wavelet = _morlet(min(len(signal), 8 * int(width)), width).real
+    conv = np.convolve(signal, wavelet, mode="same")
+    energy = np.sum(conv ** 2)
+    return float(energy)
+
+
+def entropy_slope(signal: np.ndarray, window: int = 32, bins: int = 32) -> float:
+    """Slope of Shannon entropy over moving windows."""
+    signal = np.asarray(signal)
+    if len(signal) < window:
         return 0.0
     entropies = []
-    for i in range(0, n - window + 1):
+    for i in range(len(signal) - window + 1):
         segment = signal[i : i + window]
-        hist, _ = np.histogram(segment, bins="auto", density=True)
-        p = hist[hist > 0]
-        entropies.append(-np.sum(p * np.log(p)))
+        hist, _ = np.histogram(segment, bins=bins, density=True)
+        nz = hist > 0
+        ent = -np.sum(hist[nz] * np.log(hist[nz]))
+        entropies.append(ent)
     x = np.arange(len(entropies))
-    slope, _ = np.polyfit(x, entropies, 1)
+    y = np.array(entropies)
+    if y.size == 0:
+        return 0.0
+    A = np.vstack([x, np.ones_like(x)]).T
+    slope, _ = np.linalg.lstsq(A, y, rcond=None)[0]
     return float(slope)
