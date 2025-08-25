@@ -48,7 +48,7 @@ class HashChainLogger:
         redacted_fields = self._apply_redaction(record_dict)
         serialized = json.dumps(record_dict, sort_keys=True)
         new_hash = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
-        record_dict["hash"] = new_hash
+        record_dict["hash_value"] = new_hash
         record_dict["redacted_fields"] = redacted_fields
         record = TelemetryRecord(**record_dict)
         self.prev_hash = new_hash

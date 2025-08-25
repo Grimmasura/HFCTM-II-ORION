@@ -18,7 +18,7 @@ class TelemetryRecord(BaseModel):
     detector_metrics: dict[str, float] = Field(default_factory=dict)
     action: Any = None
     prev_hash: Optional[str] = None
-    hash: Optional[str] = None
+    hash_value: Optional[str] = None
     redacted_fields: list[str] = Field(default_factory=list)
 
     model_config = {"protected_namespaces": ()}
