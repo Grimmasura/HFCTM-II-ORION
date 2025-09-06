@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-router = APIRouter(prefix="/api/v1/manifold_router", tags=["Manifold Router"])
+router = APIRouter()
 
 @router.post("/distribute_task")
 async def distribute_task(task: str, depth: int):
