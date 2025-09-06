@@ -1,1 +1,0 @@
-# Egregore defense system implementation.
