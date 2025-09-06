@@ -4,6 +4,20 @@ import numpy as np
 from models.stability_core import stability_core
 from orion_api.config import settings
 
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+try:
+    import torch_xla.core.xla_model as xm  # type: ignore
+    _xla_available = True
+except Exception:  # pragma: no cover - optional dependency
+    _xla_available = False
+
+try:
+    import jax
+    _jax_available = True
+except Exception:  # pragma: no cover - optional dependency
+    _jax_available = False
+
 try:
     from stable_baselines3 import PPO
     import gym
@@ -40,6 +54,40 @@ if PPO is not None:
     print("✅ Model loaded successfully.")
 
 
+# ---------------------------------------------------------------------------
+# Hugging Face model setup
+# ---------------------------------------------------------------------------
+
+HF_MODEL_NAME = os.getenv("RECURSIVE_HF_MODEL", "sshleifer/tiny-gpt2")
+USING_FLAX = False
+
+if _xla_available:
+    device = xm.xla_device()
+    tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_NAME)
+    model = AutoModelForCausalLM.from_pretrained(HF_MODEL_NAME).to(device)
+elif _jax_available:
+    from transformers import FlaxAutoModelForCausalLM
+    from jax.experimental import pjit
+
+    USING_FLAX = True
+    tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_NAME)
+    model = FlaxAutoModelForCausalLM.from_pretrained(HF_MODEL_NAME)
+    tpu = jax.devices("tpu")[0] if jax.devices("tpu") else jax.devices()[0]
+    device = tpu
+
+    @pjit
+    def _to_device(params):
+        return jax.device_put(params, tpu)
+
+    model.params = _to_device(model.params)
+else:
+    import torch
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_NAME)
+    model = AutoModelForCausalLM.from_pretrained(HF_MODEL_NAME).to(device)
+
+
 def recursive_model_live(query: str, depth: int):
     """Recursively generate a response for the given query.
 
@@ -56,6 +104,34 @@ def recursive_model_live(query: str, depth: int):
         processed_tokens.append(step["token"])
 
     processed_query = " ".join(processed_tokens)
+
+    # Generate a response using the loaded language model
+    if USING_FLAX:
+        import jax
+
+        key = jax.random.PRNGKey(0)
+        input_ids = tokenizer(processed_query, return_tensors="jax")["input_ids"]
+        sequences = model.generate(
+            input_ids=input_ids,
+            max_new_tokens=settings.max_tokens,
+            do_sample=settings.temperature > 0,
+            temperature=settings.temperature,
+            prng_key=key,
+            params=model.params,
+        ).sequences
+        generated_text = tokenizer.decode(sequences[0], skip_special_tokens=True)
+    else:
+        import torch
+
+        inputs = tokenizer(processed_query, return_tensors="pt").to(device)
+        with torch.no_grad():
+            sequences = model.generate(
+                **inputs,
+                max_new_tokens=settings.max_tokens,
+                do_sample=settings.temperature > 0,
+                temperature=settings.temperature,
+            )
+        generated_text = tokenizer.decode(sequences[0], skip_special_tokens=True)
 
     if agent is None:
         optimal_depth = depth
@@ -74,7 +150,7 @@ def recursive_model_live(query: str, depth: int):
             print(f"⚠ Prediction skipped due to invalid observation format: {e}")
             optimal_depth = depth
     if optimal_depth <= 0:
-        return f"Base case: {processed_query}"
-    response = f"Recursive Expansion of '{processed_query}' at depth {optimal_depth}"
+        return f"Base case: {generated_text}"
+    response = f"Recursive Expansion of '{generated_text}' at depth {optimal_depth}"
     return response + "\n" + recursive_model_live(processed_query, optimal_depth - 1)
 
