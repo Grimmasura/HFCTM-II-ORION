@@ -9,6 +9,7 @@ from orion_api.routers import (
     perception,
 )
 from models.stability_core import stability_core
+from orion_api.config import settings
 
 app = FastAPI(title="O.R.I.O.N. ∞ API")
 
@@ -23,7 +24,11 @@ app.include_router(perception.router, prefix="/api/v1/perception", tags=["Percep
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to O.R.I.O.N. ∞ API"}
+    return {
+        "message": f"Welcome to O.R.I.O.N. ∞ API",
+        "host": settings.host,
+        "port": settings.port,
+    }
 
 
 @app.get("/health")

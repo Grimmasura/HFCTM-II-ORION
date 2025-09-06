@@ -16,7 +16,7 @@ O.R.I.O.N. ∞ (Omniversal Recursive Intelligence and Ontological Network) is an
     ```
 2. Run the API:
     ```bash
-    uvicorn orion_api.main:app --host 0.0.0.0 --port 8080
+    uvicorn orion_api.main:app --host $ORION_HOST --port $ORION_PORT
     ```
 3. Deploy with Docker:
     ```bash
@@ -28,6 +28,25 @@ O.R.I.O.N. ∞ (Omniversal Recursive Intelligence and Ontological Network) is an
     kubectl apply -f deployment/orion-deployment.yml
     ```
 
+## Configuration
+Runtime settings are managed via `orion_api/config.py`, which uses
+Pydantic's `BaseSettings`.  Values can be supplied through environment
+variables or a `.env` file.  The most common options are:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ORION_HOST` | Host interface for the API | `0.0.0.0` |
+| `ORION_PORT` | Port the API listens on | `8080` |
+| `ORION_MODEL_DIR` | Directory where models are stored | `models` |
+| `ORION_RECURSIVE_MODEL_PATH` | Path to the recursive model file | `models/recursive_live_optimization_model.zip` |
+
+Example `.env` file:
+
+```env
+ORION_HOST=127.0.0.1
+ORION_PORT=8000
+```
+
 ## Benchmarking
 Run recursive AI performance tests:
 ```bash
@@ -37,7 +56,7 @@ python benchmarks/benchmark_recursive.py
 ## Testing
 Install minimal test dependencies and run the unit tests:
 ```bash
-pip install fastapi==0.115.11 httpx==0.27.0 pytest==8.0.0
+pip install fastapi==0.115.11 httpx==0.27.0 pytest==8.0.0 pydantic-settings==2.10.1
 pytest -q
 ```
 The pinned `httpx` version has been tested with FastAPI's `TestClient` to ensure
