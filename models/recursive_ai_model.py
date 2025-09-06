@@ -2,6 +2,7 @@ import os
 import urllib.request
 import numpy as np
 from models.stability_core import stability_core
+from orion_api.config import settings
 
 try:
     from stable_baselines3 import PPO
@@ -10,8 +11,8 @@ except ImportError:  # Fallback when dependencies are missing
     PPO = None
     gym = None
 
-MODEL_DIR = "models"
-MODEL_PATH = os.path.join(MODEL_DIR, "recursive_live_optimization_model.zip")
+MODEL_DIR = settings.model_dir
+MODEL_PATH = settings.recursive_model_path
 MODEL_URL = os.getenv(
     "RECURSIVE_MODEL_URL",
     "https://github.com/HFCTM-II-ORION/HFCTM-II-ORION/releases/latest/download/recursive_live_optimization_model.zip",
