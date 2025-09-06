@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     port: int = 8080
     model_dir: Path = Path("models")
     recursive_model_path: Path = Path("models/recursive_live_optimization_model.zip")
+    max_tokens: int = 50
+    temperature: float = 1.0
 
     model_config = SettingsConfigDict(
         env_prefix="ORION_",
