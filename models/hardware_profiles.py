@@ -24,6 +24,7 @@ class HardwareConfig:
     intervals: Dict[str, int]
     sentinel_count: int
     latency_budget_ms: int
+    tpu_mesh: Dict[str, int] | None = None
     optional: bool | None = False
 
 

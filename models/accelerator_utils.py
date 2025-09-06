@@ -11,6 +11,13 @@ try:  # pragma: no cover - optional dependency
 except Exception:  # pragma: no cover - fallback when PyYAML missing
     yaml = None
 
+try:  # pragma: no cover - optional dependency
+    import torch_xla.core.xla_model as xm  # type: ignore
+    _xla_available = True
+except Exception:  # pragma: no cover - torch_xla not installed
+    xm = None
+    _xla_available = False
+
 CONFIG_DIR = Path(__file__).resolve().parent.parent / "configs"
 
 
@@ -29,14 +36,26 @@ def load_config(name: str) -> dict:
         return json.load(fh)
 
 
-def get_degradation_profile(*, has_tpu: bool, has_qpu: bool) -> dict:
+def get_degradation_profile(*, has_qpu: bool, has_tpu: bool | None = None) -> dict:
     """Return the runtime profile for the current hardware mix.
+
+    ``has_tpu`` may be provided explicitly for tests.  When ``None`` the
+    function attempts to detect TPU availability via :mod:`torch_xla`.
 
     When neither TPU nor QPU is available (i.e. GPU-only), the system falls back
     to the "Aspen" profile which exposes reduced metrics, applies a wider
     hysteresis window and restricts actions to warning and stabilization.  If an
     accelerator is present a full profile is returned.
     """
+
+    if has_tpu is None:
+        has_tpu = False
+        if _xla_available:
+            try:  # pragma: no cover - best effort detection
+                xm.xla_device()
+                has_tpu = True
+            except Exception:  # pragma: no cover - TPU not accessible
+                has_tpu = False
 
     if not (has_tpu or has_qpu):
         return {
