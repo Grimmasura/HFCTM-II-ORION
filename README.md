@@ -67,6 +67,24 @@ The repository previously listed Hugging Face's `transformers` library in
 `requirements.txt`, but no modules actually used it. The dependency has been
 removed to keep installation lightweight.
 
+## Azure Quantum Integration
+Running against real hardware requires Microsoft Azure Quantum credentials.  Set
+the following environment variables to enable the `majorana1` backend used by
+the `/quantum-sync/status` endpoint:
+
+| Variable | Description |
+|----------|-------------|
+| `AZURE_QUANTUM_SUBSCRIPTION_ID` | Azure subscription identifier |
+| `AZURE_QUANTUM_RESOURCE_GROUP` | Resource group containing the workspace |
+| `AZURE_QUANTUM_WORKSPACE_NAME` | Azure Quantum workspace name |
+| `AZURE_QUANTUM_LOCATION` | (Optional) workspace region, e.g. `eastus` |
+
+Authentication relies on [Azure Identity's `DefaultAzureCredential`][dac].  In
+most deployments this means providing the standard service principal secrets:
+`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_CLIENT_SECRET`.
+
+[dac]: https://learn.microsoft.com/python/api/overview/azure/identity-readme
+
 ## Automation Scripts
 Scripts such as `commit_file.py` can automatically commit changes. To push to a
 remote repository these scripts require a `GITHUB_TOKEN` environment variable.
