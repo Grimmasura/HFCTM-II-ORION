@@ -1,5 +1,6 @@
 import os
 import urllib.request
+import numpy as np
 from models.stability_core import stability_core
 
 try:
@@ -11,8 +12,9 @@ except ImportError:  # Fallback when dependencies are missing
 
 MODEL_DIR = "models"
 MODEL_PATH = os.path.join(MODEL_DIR, "recursive_live_optimization_model.zip")
-MODEL_URL = (
-    "https://github.com/YOUR_GITHUB_USER/YOUR_REPO/releases/download/v1.0/recursive_live_optimization_model.zip"
+MODEL_URL = os.getenv(
+    "RECURSIVE_MODEL_URL",
+    "https://github.com/HFCTM-II-ORION/HFCTM-II-ORION/releases/latest/download/recursive_live_optimization_model.zip",
 )
 
 os.makedirs(MODEL_DIR, exist_ok=True)
@@ -57,7 +59,19 @@ def recursive_model_live(query: str, depth: int):
     if agent is None:
         optimal_depth = depth
     else:
-        optimal_depth = agent.predict(depth)[0]
+        try:
+            obs_space = getattr(agent, "observation_space", None)
+            if obs_space is None or obs_space.shape is None:
+                raise ValueError("Agent lacks observation space definition")
+            observation = np.full(obs_space.shape, depth, dtype=np.float32)
+            if observation.shape != obs_space.shape:
+                raise ValueError(
+                    f"Expected observation shape {obs_space.shape}, got {observation.shape}"
+                )
+            optimal_depth = agent.predict(observation)[0]
+        except Exception as e:
+            print(f"⚠ Prediction skipped due to invalid observation format: {e}")
+            optimal_depth = depth
     if optimal_depth <= 0:
         return f"Base case: {processed_query}"
     response = f"Recursive Expansion of '{processed_query}' at depth {optimal_depth}"
