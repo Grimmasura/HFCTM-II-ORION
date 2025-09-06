@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hfctm-ii-config
+  labels:
+    app: hfctm-ii
+data:
+  LOG_LEVEL: "info"
+  MODEL_VARIANT: "production"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hfctm-ii
+  labels:
+    app: hfctm-ii
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hfctm-ii
+  template:
+    metadata:
+      labels:
+        app: hfctm-ii
+    spec:
+      nodeSelector:
+        qpu: "majorana1"
+        tpu: "ironwood-tpu"
+      tolerations:
+        - key: "qpu"
+          operator: "Equal"
+          value: "majorana1"
+          effect: "NoSchedule"
+        - key: "tpu"
+          operator: "Equal"
+          value: "ironwood-tpu"
+          effect: "NoSchedule"
+      containers:
+        - name: hfctm-ii
+          image: your-registry/hfctm-ii:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: AZURE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: azure-credentials
+                  key: client-id
+            - name: AZURE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: azure-credentials
+                  key: client-secret
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  name: google-credentials
+                  key: service-account.json
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hfctm-ii
+  labels:
+    app: hfctm-ii
+spec:
+  selector:
+    app: hfctm-ii
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hfctm-ii
+  labels:
+    app: hfctm-ii
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hfctm-ii
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hfctm-ii-allow
+  labels:
+    app: hfctm-ii
+spec:
+  podSelector:
+    matchLabels:
+      app: hfctm-ii
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 80
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hfctm-ii
+  labels:
+    app: hfctm-ii
+spec:
+  selector:
+    matchLabels:
+      app: hfctm-ii
+  endpoints:
+    - port: http
+      interval: 30s
