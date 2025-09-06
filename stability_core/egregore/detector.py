@@ -2,7 +2,7 @@ import hashlib
 import os
 import time
 from dataclasses import dataclass, field
-from typing import Callable, Dict, Any
+from typing import Callable, Dict, Any, Optional
 
 from . import metrics as m
 
@@ -113,7 +113,7 @@ def EgState() -> Dict[str, str]:
     return DETECTOR.state()
 
 
-def EgMitigate() -> str | None:
+def EgMitigate() -> Optional[str]:
     """Apply mitigation based on detector state."""
     states = DETECTOR.state()
     alerts = sum(s == "alert" for s in states.values())
