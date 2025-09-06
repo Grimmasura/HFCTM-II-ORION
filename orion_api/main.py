@@ -5,6 +5,8 @@ from orion_api.routers import (
     recursive_trust,
     egregore_defense,
     manifold_router,
+    knowledge_expansion,
+    perception,
 )
 from models.stability_core import stability_core
 
@@ -16,6 +18,8 @@ app.include_router(quantum_sync.router, prefix="/quantum-sync", tags=["Quantum S
 app.include_router(recursive_trust.router, prefix="/trust", tags=["Recursive Trust"])
 app.include_router(egregore_defense.router, prefix="/egregore", tags=["Egregore Defense"])
 app.include_router(manifold_router.router, prefix="/manifold", tags=["Manifold Routing"])
+app.include_router(knowledge_expansion.router, prefix="/api/v1/knowledge", tags=["Knowledge Expansion"])
+app.include_router(perception.router, prefix="/api/v1/perception", tags=["Perception"])
 
 @app.get("/")
 async def root():
