@@ -1,6 +1,7 @@
 import os
 import urllib.request
 import numpy as np
+import torch
 from models.stability_core import stability_core
 from orion_api.config import settings
 
@@ -111,26 +112,45 @@ def recursive_model_live(query: str, depth: int):
 
         key = jax.random.PRNGKey(0)
         input_ids = tokenizer(processed_query, return_tensors="jax")["input_ids"]
-        sequences = model.generate(
-            input_ids=input_ids,
-            max_new_tokens=settings.max_tokens,
-            do_sample=settings.temperature > 0,
-            temperature=settings.temperature,
-            prng_key=key,
-            params=model.params,
-        ).sequences
-        generated_text = tokenizer.decode(sequences[0], skip_special_tokens=True)
-    else:
-        import torch
 
-        inputs = tokenizer(processed_query, return_tensors="pt").to(device)
-        with torch.no_grad():
-            sequences = model.generate(
-                **inputs,
+        @pjit
+        def _generate(ids, params, key):
+            return model.generate(
+                input_ids=ids,
                 max_new_tokens=settings.max_tokens,
                 do_sample=settings.temperature > 0,
                 temperature=settings.temperature,
-            )
+                prng_key=key,
+                params=params,
+            ).sequences
+
+        sequences = _generate(input_ids, model.params, key)
+        generated_text = tokenizer.decode(sequences[0], skip_special_tokens=True)
+    else:
+        inputs = tokenizer(processed_query, return_tensors="pt").to(device)
+        if _xla_available:
+            output: dict[str, torch.Tensor] = {}
+            optimizer = torch.optim.SGD(model.parameters(), lr=0.0)
+
+            def closure() -> torch.Tensor:
+                output["seq"] = model.generate(
+                    **inputs,
+                    max_new_tokens=settings.max_tokens,
+                    do_sample=settings.temperature > 0,
+                    temperature=settings.temperature,
+                )
+                return torch.tensor(0.0, device=inputs["input_ids"].device)
+
+            xm.optimizer_step(optimizer, barrier=True, closure=closure)
+            sequences = output["seq"]
+        else:
+            with torch.no_grad():
+                sequences = model.generate(
+                    **inputs,
+                    max_new_tokens=settings.max_tokens,
+                    do_sample=settings.temperature > 0,
+                    temperature=settings.temperature,
+                )
         generated_text = tokenizer.decode(sequences[0], skip_special_tokens=True)
 
     if agent is None:
