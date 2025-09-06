@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from models.egregore_defense import evaluate_threat
 
-router = APIRouter(prefix="/api/v1/egregore", tags=["Egregore Defense"])
+router = APIRouter()
 
 @router.get("/shield")
 async def activate_shield(threat: float = 0.0):
