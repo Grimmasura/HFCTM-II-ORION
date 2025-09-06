@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-router = APIRouter(prefix="/api/v1/perception", tags=["Perception"])
+router = APIRouter()
 
 @router.get("/ping")
 async def ping():
