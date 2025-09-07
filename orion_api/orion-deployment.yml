@@ -15,5 +15,6 @@ spec:
       containers:
         - name: orion-api
           image: orion-api:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

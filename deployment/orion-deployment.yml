@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: orion-api
-        image: your-dockerhub-user/orion-api:latest
+        image: orion-api:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         resources:

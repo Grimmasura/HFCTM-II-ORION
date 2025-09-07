@@ -16,7 +16,7 @@ except ImportError:
     TPU_AVAILABLE = False
     
 try:
-    import qiskit
+    import cirq
     QUANTUM_AVAILABLE = True
 except ImportError:
     QUANTUM_AVAILABLE = False

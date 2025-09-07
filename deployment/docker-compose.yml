@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   orion-api:
-    build: .
+    build:
+      context: ..
+      dockerfile: orion_api/Dockerfile
     ports:
       - "8080:8080"
     environment:
