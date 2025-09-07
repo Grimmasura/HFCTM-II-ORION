@@ -16,6 +16,18 @@ class Settings(BaseSettings):
     max_tokens: int = 50
     temperature: float = 1.0
 
+    # HFCTM-II hardware configuration
+    enable_majorana1: bool = False
+    enable_ironwood_tpu: bool = False
+    safety_overhead_budget: float = 2.0
+
+    azure_quantum_subscription_id: str = ""
+    azure_quantum_workspace: str = ""
+    quantum_shots: int = 1000
+
+    ironwood_cluster_size: int = 256
+    tpu_precision: str = "bf16"
+
     model_config = SettingsConfigDict(
         env_prefix="ORION_",
         env_file=".env",
