@@ -1,13 +1,11 @@
 # Core PyTorch ecosystem
 torch>=2.2.0,<2.3.0
 transformers>=4.36.0,<4.37.0
-accelerate>=0.25.0,<0.26.0
-tokenizers>=0.15.0,<0.16.0
 
 # Quantum computing (Majorana1)
-qiskit>=0.45.0,<0.46.0
-cirq>=1.3.0,<1.4.0
-pennylane>=0.33.0,<0.34.0
+qiskit>=2.1.0,<2.2.0
+cirq-core>=1.3.0,<1.4.0
+azure-quantum>=0.13.0,<0.14.0
 
 # TPU support (Ironwood)
 jax>=0.4.20,<0.5.0
@@ -15,17 +13,10 @@ jaxlib>=0.4.20,<0.5.0
 
 # HFCTM-II specific
 numpy>=1.24.0,<2.1.0
-scipy>=1.11.0,<1.13.0
 pywavelets>=1.4.1,<1.5.0
-networkx>=2.8,<3.0
-cryptography>=41.0.0,<42.0.0
 
 # Existing ORION
 fastapi>=0.104.0,<0.105.0
 uvicorn>=0.24.0,<0.25.0
-pydantic>=2.5.0,<2.6.0
-pydantic-settings>=2.1.0,<2.2.0
-prometheus-client>=0.19.0,<0.20.0
-psutil>=5.9.0,<5.10.0
-pytest>=8.0.0,<8.1.0
-httpx>=0.27.0,<0.28.0
+pydantic>=2,<3
+pydantic-settings>=2,<3
