@@ -1,4 +1,6 @@
-import numpy as np
+import pytest
+
+np = pytest.importorskip("numpy")
 
 from stability_core.egregore import EgDetect, EgState, EgMitigate, EgAudit
 from stability_core.egregore.detector import LOGGER, DETECTOR

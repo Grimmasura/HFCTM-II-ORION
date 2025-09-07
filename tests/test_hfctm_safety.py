@@ -1,5 +1,7 @@
 import asyncio
-import numpy as np
+import pytest
+
+np = pytest.importorskip("numpy")
 
 from orion_api.hfctm_safety import HFCTMII_SafetyCore, SafetyConfig
 

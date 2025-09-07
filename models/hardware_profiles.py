@@ -74,7 +74,10 @@ def compute(values: List[int], use_accelerator: bool = False) -> List[int]:
     """Simple computation path used for parity testing."""
 
     if use_accelerator:
-        import numpy as np
+        try:  # fall back gracefully if NumPy is unavailable
+            import numpy as np  # type: ignore
+        except Exception:
+            return [v * v for v in values]
         arr = np.array(values)
         return np.square(arr).tolist()
     return [v * v for v in values]

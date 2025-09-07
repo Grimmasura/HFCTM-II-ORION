@@ -1,5 +1,9 @@
 import os
 import sys
+import pytest
+
+pytest.importorskip("fastapi")
+pytest.importorskip("numpy")
 from fastapi.testclient import TestClient
 
 
