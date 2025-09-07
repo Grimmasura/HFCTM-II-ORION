@@ -14,7 +14,7 @@ jax>=0.4.20
 jaxlib>=0.4.20
 
 # HFCTM-II specific
-numpy>=1.24.0
+numpy>=1.24.0,<2.0.0
 scipy>=1.11.0
 pywavelets>=1.4.1
 networkx>=3.1
