@@ -1,0 +1,87 @@
+name: HFCTM-II Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  dependency-validation:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Validate HFCTM-II Dependencies
+      run: |
+        python -c "
+        import sys
+        packages = ['cirq', 'networkx', 'fastapi', 'torch', 'numpy']
+        for pkg in packages:
+            try:
+                module = __import__(pkg)
+                version = getattr(module, '__version__', 'unknown')
+                print(f'\u2713 {pkg}: {version}')
+            except ImportError as e:
+                print(f'\u2717 {pkg}: {e}')
+                sys.exit(1)
+        print('All HFCTM-II dependencies validated successfully')
+        "
+
+    - name: Test Quantum Backend
+      run: |
+        python -c "
+        from orion_api.quantum.backend_adapter import HFCTMQuantumInterface
+        qi = HFCTMQuantumInterface()
+        print(f'Quantum backend initialized: {type(qi.backend).__name__}')
+        print(f'Fallback active: {qi.fallback_active}')
+        "
+
+    - name: Run tests
+      run: |
+        pytest tests/ -v --tb=short
+
+    - name: Check code formatting
+      run: |
+        black --check .
+        flake8 .
+
+  docker-build:
+    needs: dependency-validation
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: |
+        docker build -t hfctm-ii-orion:latest .
+
+    - name: Test Docker container
+      run: |
+        docker run --rm hfctm-ii-orion:latest python -c "
+        import cirq, networkx, fastapi
+        print('Docker container dependencies OK')
+        "

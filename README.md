@@ -10,7 +10,7 @@ O.R.I.O.N. ∞ (Omniversal Recursive Intelligence and Ontological Network) is an
 - **Live Monitoring with Prometheus & Grafana**.
 
 ## Setup & Deployment
-1. Install dependencies:
+1. Install dependencies (all versions pinned for stability):
     ```bash
     pip install -r requirements.txt
     ```
@@ -20,7 +20,7 @@ O.R.I.O.N. ∞ (Omniversal Recursive Intelligence and Ontological Network) is an
     ```
 3. Deploy with Docker:
     ```bash
-    docker build -t orion-api .
+    docker build -f orion_api/Dockerfile -t orion-api .
     docker run -p 8080:8080 orion-api
     ```
 4. Deploy on Kubernetes:
@@ -54,18 +54,18 @@ python benchmarks/benchmark_recursive.py
 ```
 
 ## Testing
-Install minimal test dependencies and run the unit tests:
+Install the full dependency set and execute the test suite:
 ```bash
-pip install fastapi==0.115.11 httpx==0.27.0 pytest==8.0.0 pydantic-settings==2.10.1
+pip install -r requirements.txt
 pytest -q
 ```
-The pinned `httpx` version has been tested with FastAPI's `TestClient` to ensure
-API routes load correctly.
+The suite includes checks that core packages import correctly and that the
+quantum interface gracefully degrades when `cirq` is unavailable.
 
 ## Dependency Notes
-The repository previously listed Hugging Face's `transformers` library in
-`requirements.txt`, but no modules actually used it. The dependency has been
-removed to keep installation lightweight.
+All dependencies are pinned in `requirements.txt` to provide deterministic builds
+across platforms. Quantum functionality is provided via `cirq`; if it is not
+installed, the system transparently falls back to a classical simulation layer.
 
 ## Azure Quantum Integration
 Running against real hardware requires Microsoft Azure Quantum credentials.  Set

@@ -1,6 +1,11 @@
+import pytest
+
+pytest.importorskip("flax")
+
 from models.recursive_ai_model import recursive_model_live
 from transformers import set_seed
 from orion_api.config import settings
+
 
 def test_recursive_model_base_case():
     result = recursive_model_live("test", 0)

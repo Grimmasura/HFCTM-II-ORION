@@ -9,12 +9,15 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 try:
     import torch_xla.core.xla_model as xm  # type: ignore
+
     _xla_available = True
 except Exception:  # pragma: no cover - optional dependency
     _xla_available = False
 
 try:
     import jax
+    import flax  # type: ignore
+
     _jax_available = True
 except Exception:  # pragma: no cover - optional dependency
     _jax_available = False
@@ -173,4 +176,3 @@ def recursive_model_live(query: str, depth: int):
         return f"Base case: {generated_text}"
     response = f"Recursive Expansion of '{generated_text}' at depth {optimal_depth}"
     return response + "\n" + recursive_model_live(processed_query, optimal_depth - 1)
-

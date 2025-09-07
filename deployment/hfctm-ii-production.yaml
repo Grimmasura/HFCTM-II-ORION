@@ -38,7 +38,8 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: hfctm-ii
-          image: your-registry/hfctm-ii:latest
+          image: hfctm-ii:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           env:

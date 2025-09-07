@@ -1,7 +1,10 @@
 version: "3.8"
 services:
   orion_api:
-    build: .
+    build:
+      context: ..
+      dockerfile: orion_api/Dockerfile
     ports:
       - "8080:8080"
+    command: uvicorn orion_api.main:app --host 0.0.0.0 --port 8080
     restart: always
