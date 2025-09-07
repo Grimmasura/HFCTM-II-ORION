@@ -1,30 +1,31 @@
-torch==2.6.0
-fastapi==0.115.11
-uvicorn==0.34.0
-pydantic==2.11.7
-pydantic-settings==2.10.1
-networkx==3.2.1
-sympy==1.13.1
-matplotlib==3.8.2
-qiskit==0.45.0
-azure-quantum==3.2.0
-qsharp==1.20.0
-pyqir==0.10.9
-pytest==8.0.0
-httpx==0.27.0
-stable-baselines3==2.2.1
-gymnasium==0.29.1
-numpy==1.26.4
-requests==2.32.3
-GitPython==3.1.40
-PyYAML==6.0.1
-transformers>=4
-accelerate
-sentencepiece
-
-# HFCTM-II safety dependencies
+# Core PyTorch ecosystem
+torch>=2.2.0
+transformers>=4.36.0
+accelerate>=0.25.0
 tokenizers>=0.15.0
+
+# Quantum computing (Majorana1)
+qiskit>=0.45.0
+cirq>=1.3.0
+pennylane>=0.33.0
+
+# TPU support (Ironwood)
+jax>=0.4.20
+jaxlib>=0.4.20
+
+# HFCTM-II specific
+numpy>=1.24.0
 scipy>=1.11.0
-scikit-learn>=1.3.0
 pywavelets>=1.4.1
+networkx>=3.1
+cryptography>=41.0.0
+
+# Existing ORION
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
 prometheus-client>=0.19.0
+psutil>=5.9.0
+pytest>=8.0.0
+httpx>=0.27.0
