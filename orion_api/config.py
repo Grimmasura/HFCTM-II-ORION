@@ -37,3 +37,28 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
+
+
+class ORIONSettings(BaseSettings):
+    """Additional ORION and HFCTM-II configuration."""
+
+    # Existing settings
+    ORION_HOST: str = "0.0.0.0"
+    ORION_PORT: int = 8080
+    ORION_MODEL_DIR: str = "models"
+
+    # HFCTM-II Settings
+    HFCTM_ENABLE_QUANTUM: bool = False
+    HFCTM_ENABLE_TPU: bool = False
+    HFCTM_OVERHEAD_BUDGET: float = 2.0
+    HFCTM_LYAPUNOV_THRESHOLD: float = 0.0
+    HFCTM_WAVELET_THRESHOLD: float = 3.0
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
+
+
+# Optional ORION settings instance
+orion_settings = ORIONSettings()
