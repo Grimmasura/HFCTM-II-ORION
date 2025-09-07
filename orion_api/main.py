@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from orion_api.routers import (
     recursive_ai,
     quantum_sync,
@@ -13,13 +14,16 @@ from orion_api.config import settings
 import numpy as np
 from .hfctm_safety import init_safety_core, safety_core, SafetyConfig
 
-app = FastAPI(title="O.R.I.O.N. ∞ API")
 
-# Initialize safety core on startup
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """FastAPI lifespan hook to initialize global resources."""
     config = SafetyConfig()
     init_safety_core(config)
+    yield
+
+
+app = FastAPI(title="O.R.I.O.N. ∞ API", lifespan=lifespan)
 
 # Safety middleware
 @app.middleware("http")

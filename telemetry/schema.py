@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Dict, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class TelemetryEvent(BaseModel):
@@ -29,7 +29,8 @@ class TelemetryEvent(BaseModel):
         default=None, description="Hash of the current telemetry event"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "description": "Telemetry event schema matching Appendix P with tamper-evident fields."
         }
+    )
