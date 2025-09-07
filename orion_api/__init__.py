@@ -5,7 +5,6 @@ from .hfctm_safety import (
     SafetyConfig,
     init_safety_core,
     safety_core,
-    safety_overhead_gauge,
 )
 
 __all__ = [
@@ -13,6 +12,4 @@ __all__ = [
     "SafetyConfig",
     "init_safety_core",
     "safety_core",
-    "safety_overhead_gauge",
 ]
-
