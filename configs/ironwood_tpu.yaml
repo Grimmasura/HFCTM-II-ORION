@@ -1,12 +1,7 @@
-precision_modes:
-  - fp32
-  - bf16
-  - fp16
-tpu_mesh:
-  rows: 2
-  cols: 2
-intervals:
-  K: 1024
-  M: 2048
-sentinel_count: 4
-latency_budget_ms: 50
+{
+  "precision_modes": ["fp32", "bf16", "fp16"],
+  "tpu_mesh": {"rows": 2, "cols": 2},
+  "intervals": {"K": 1024, "M": 2048},
+  "sentinel_count": 4,
+  "latency_budget_ms": 50
+}
