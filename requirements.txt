@@ -1,8 +1,8 @@
 # HFCTM-II Core Framework - Recursive Stability Foundation
 fastapi==0.115.11
 uvicorn[standard]==0.20.0
-pydantic==2.7.0
-pydantic-settings==2.10.1
+pydantic==2.5.0
+pydantic-settings==2.2.1
 httpx==0.27.0
 
 # Quantum Computing Stack - Conservative Compatibility Approach
@@ -11,8 +11,8 @@ cirq-core==1.2.0
 # Will be re-evaluated when quantum ecosystem stabilizes
 # Implementing fallback quantum simulation instead
 
-# Graph Analysis - NetworkX 3.2+ required for cirq-core 1.2.0
-networkx>=3.2.0,<4.0.0
+# Graph Analysis - locked to compatible version
+networkx==3.1
 
 # Machine Learning & AI Stack - Tested Combinations
 torch==2.1.0
