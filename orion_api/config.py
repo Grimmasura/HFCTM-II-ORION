@@ -1,12 +1,16 @@
+"""Application configuration management using Pydantic settings."""
+
+from __future__ import annotations
+
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Application configuration using environment variables.
+    """Base configuration for the O.R.I.O.N. API.
 
-    Values can be overridden via environment variables with the prefix
-    ``ORION_`` or by providing a ``.env`` file in the project root.
+    Values can be overridden using environment variables prefixed with
+    ``ORION_`` or by providing a ``.env`` file at the project root.
     """
 
     host: str = "0.0.0.0"
@@ -16,18 +20,6 @@ class Settings(BaseSettings):
     max_tokens: int = 50
     temperature: float = 1.0
 
-    # HFCTM-II hardware configuration
-    enable_majorana1: bool = False
-    enable_ironwood_tpu: bool = False
-    safety_overhead_budget: float = 2.0
-
-    azure_quantum_subscription_id: str = ""
-    azure_quantum_workspace: str = ""
-    quantum_shots: int = 1000
-
-    ironwood_cluster_size: int = 256
-    tpu_precision: str = "bf16"
-
     model_config = SettingsConfigDict(
         env_prefix="ORION_",
         env_file=".env",
@@ -35,30 +27,5 @@ class Settings(BaseSettings):
     )
 
 
-# Global settings instance
+# Global settings instance used throughout the application
 settings = Settings()
-
-
-class ORIONSettings(BaseSettings):
-    """Additional ORION and HFCTM-II configuration."""
-
-    # Existing settings
-    ORION_HOST: str = "0.0.0.0"
-    ORION_PORT: int = 8080
-    ORION_MODEL_DIR: str = "models"
-
-    # HFCTM-II Settings
-    HFCTM_ENABLE_QUANTUM: bool = False
-    HFCTM_ENABLE_TPU: bool = False
-    HFCTM_OVERHEAD_BUDGET: float = 2.0
-    HFCTM_LYAPUNOV_THRESHOLD: float = 0.0
-    HFCTM_WAVELET_THRESHOLD: float = 3.0
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-    )
-
-
-# Optional ORION settings instance
-orion_settings = ORIONSettings()

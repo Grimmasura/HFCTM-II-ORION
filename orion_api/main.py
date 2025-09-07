@@ -10,7 +10,7 @@ from orion_api.routers import (
 )
 from models.stability_core import stability_core
 from orion_api.config import settings
-import torch
+import numpy as np
 from .hfctm_safety import init_safety_core, safety_core, SafetyConfig
 
 app = FastAPI(title="O.R.I.O.N. ∞ API")
@@ -65,8 +65,8 @@ async def safety_status():
     if not safety_core:
         return {"error": "Safety core not initialized"}
 
-    # Mock safety check
-    mock_state = torch.randn(10, 10)
+    # Mock safety check using NumPy arrays to avoid heavy dependencies
+    mock_state = np.random.randn(10, 10)
     result = await safety_core.safety_check(mock_state)
 
     return {
