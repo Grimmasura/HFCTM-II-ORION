@@ -67,20 +67,31 @@ if _xla_available:
     tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_NAME)
     model = AutoModelForCausalLM.from_pretrained(HF_MODEL_NAME).to(device)
 elif _jax_available:
-    from transformers import FlaxAutoModelForCausalLM
-    from jax.experimental import pjit
+    try:
+        tpu = jax.devices("tpu")[0]
+    except Exception:  # pragma: no cover - TPU runtime missing
+        tpu = None
 
-    USING_FLAX = True
-    tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_NAME)
-    model = FlaxAutoModelForCausalLM.from_pretrained(HF_MODEL_NAME)
-    tpu = jax.devices("tpu")[0] if jax.devices("tpu") else jax.devices()[0]
-    device = tpu
+    if tpu is not None:
+        from transformers import FlaxAutoModelForCausalLM
+        from jax.experimental import pjit
 
-    @pjit
-    def _to_device(params):
-        return jax.device_put(params, tpu)
+        USING_FLAX = True
+        tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_NAME)
+        model = FlaxAutoModelForCausalLM.from_pretrained(HF_MODEL_NAME)
+        device = tpu
 
-    model.params = _to_device(model.params)
+        @pjit
+        def _to_device(params):
+            return jax.device_put(params, tpu)
+
+        model.params = _to_device(model.params)
+    else:
+        import torch
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_NAME)
+        model = AutoModelForCausalLM.from_pretrained(HF_MODEL_NAME).to(device)
 else:
     import torch
 
