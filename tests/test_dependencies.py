@@ -22,7 +22,8 @@ def test_networkx_version_compatibility():
     """Ensure NetworkX version is compatible with Cirq"""
     import networkx as nx
 
-    assert version.parse(nx.__version__) == version.parse("3.1")
+    nx_version = version.parse(nx.__version__)
+    assert version.parse("3.1") <= nx_version < version.parse("4.0")
 
 
 def test_cirq_networkx_integration():

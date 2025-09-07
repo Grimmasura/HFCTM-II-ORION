@@ -12,7 +12,7 @@ cirq-core==1.2.0
 # Implementing fallback quantum simulation instead
 
 # Graph Analysis - locked to compatible version
-networkx==3.1
+networkx>=3.1,<4.0
 
 # Machine Learning & AI Stack - Tested Combinations
 torch==2.1.0
