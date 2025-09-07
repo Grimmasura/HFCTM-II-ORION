@@ -1,0 +1,2 @@
+# Enforce modern matplotlib to avoid legacy build issues
+matplotlib>=3.7.0

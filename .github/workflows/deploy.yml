@@ -1,20 +1,19 @@
 name: 🚀 Deploy ORION
 
 on:
-  push:
-    branches:
-      - main  # Adjust branch if needed
   workflow_dispatch:  # Allows manual trigger
+  push:
+    tags:
+      - 'deploy-*'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+    if: ${{ secrets.GH_PAT != '' }}
+
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: 🔐 Authenticate with GitHub
         env:
@@ -25,14 +24,15 @@ jobs:
           git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/Grimmasura/HFCTM-II-ORION.git
 
       - name: 🏗️ Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.11"
 
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt -c constraints.txt
+          pip install -r requirements-dev.txt -c constraints.txt
 
       - name: 🚀 Run Tests
         run: pytest --disable-warnings || echo "⚠️ Tests failed, but continuing deployment..."

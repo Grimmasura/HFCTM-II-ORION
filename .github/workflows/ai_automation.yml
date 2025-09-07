@@ -1,27 +1,23 @@
 name: AI GitHub Automation
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-  issues:
-    types: [opened]
+  workflow_dispatch:
   push:
-    branches:
-      - main
+    tags:
+      - 'automation-*'
 
 jobs:
   auto-commit:
     runs-on: ubuntu-latest
+    if: ${{ secrets.GH_TOKEN != '' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          ref: main
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -33,16 +29,15 @@ jobs:
 
   auto-pr:
     runs-on: ubuntu-latest
+    if: ${{ secrets.GH_TOKEN != '' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          ref: main
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -54,16 +49,15 @@ jobs:
 
   auto-issues:
     runs-on: ubuntu-latest
+    if: ${{ secrets.GH_TOKEN != '' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          ref: main
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -75,16 +69,15 @@ jobs:
 
   auto-merge:
     runs-on: ubuntu-latest
+    if: ${{ secrets.GH_TOKEN != '' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          ref: main
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
