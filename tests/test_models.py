@@ -1,3 +1,7 @@
+import pytest
+
+pytest.importorskip("numpy")
+
 from models.recursive_ai_model import recursive_model_live
 from orion_api.config import settings
 import random

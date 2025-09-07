@@ -7,6 +7,8 @@ try:
 except Exception as e:  # e.g., httpx missing
     pytest.skip(f"FastAPI TestClient unavailable: {e}", allow_module_level=True)
 
+pytest.importorskip("numpy")
+
 # Ensure project root is on sys.path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
