@@ -1,9 +1,7 @@
-precision_modes:
-  - qf64
-  - qf32
-intervals:
-  K: 4096
-  M: 8192
-sentinel_count: 6
-latency_budget_ms: 100
-optional: true
+{
+  "precision_modes": ["qf64", "qf32"],
+  "intervals": {"K": 4096, "M": 8192},
+  "sentinel_count": 6,
+  "latency_budget_ms": 100,
+  "optional": true
+}
