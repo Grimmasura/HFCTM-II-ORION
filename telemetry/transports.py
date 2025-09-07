@@ -6,7 +6,10 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import requests
+try:  # pragma: no cover - optional dependency
+    import requests
+except Exception:  # pragma: no cover - fallback when requests missing
+    requests = None  # type: ignore
 
 
 class TransportProtocol:
@@ -37,7 +40,9 @@ class FileTransport(TransportProtocol):
 class HTTPTransport(TransportProtocol):
     """POST telemetry records to an HTTP endpoint."""
 
-    def __init__(self, url: str, *, session: Optional[requests.Session] = None) -> None:
+    def __init__(self, url: str, *, session: Optional[Any] = None) -> None:
+        if requests is None:
+            raise RuntimeError("requests library is required for HTTPTransport")
         self.url = url
         self.session = session or requests.Session()
 

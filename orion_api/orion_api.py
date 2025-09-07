@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
-import torch
 import numpy as np
 from orion_api.config import settings
 

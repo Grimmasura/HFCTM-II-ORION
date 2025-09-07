@@ -1,5 +1,5 @@
 import asyncio
-import torch
+import numpy as np
 import pytest
 
 from orion_api.hfctm_safety import HFCTMII_SafetyCore, SafetyConfig
@@ -7,7 +7,7 @@ from orion_api.hfctm_safety import HFCTMII_SafetyCore, SafetyConfig
 
 def test_safety_check_returns_metrics() -> None:
     core = HFCTMII_SafetyCore(SafetyConfig())
-    result = asyncio.run(core.safety_check(torch.randn(10, 10)))
+    result = asyncio.run(core.safety_check(np.random.randn(10, 10)))
     assert "metrics" in result
     assert "lyapunov" in result["metrics"]
     assert "wavelet_energy" in result["metrics"]

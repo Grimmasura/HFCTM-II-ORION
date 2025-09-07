@@ -1,3 +1,15 @@
+"""Main FastAPI application for the lightweight test harness.
+
+The original project depends heavily on external machine learning libraries
+such as PyTorch for tensor operations.  Those dependencies are expensive to
+install and are unnecessary for the unit tests in this kata, so the runtime
+has been refactored to use only the Python standard library and ``numpy``.
+
+This module therefore avoids importing PyTorch and instead relies on ``numpy``
+arrays when mock data is required.  The public API remains the same which keeps
+the tests compatible while dramatically reducing the dependency footprint.
+"""
+
 from fastapi import FastAPI
 from orion_api.routers import (
     recursive_ai,
@@ -10,7 +22,7 @@ from orion_api.routers import (
 )
 from models.stability_core import stability_core
 from orion_api.config import settings
-import torch
+import numpy as np
 from .hfctm_safety import init_safety_core, safety_core, SafetyConfig
 
 app = FastAPI(title="O.R.I.O.N. ∞ API")
@@ -65,8 +77,11 @@ async def safety_status():
     if not safety_core:
         return {"error": "Safety core not initialized"}
 
-    # Mock safety check
-    mock_state = torch.randn(10, 10)
+    # Mock safety check using a small random matrix.  ``HFCTMII_SafetyCore``
+    # now operates on ``numpy.ndarray`` instances instead of ``torch.Tensor``
+    # objects which keeps the behaviour deterministic without requiring the
+    # heavyweight PyTorch dependency.
+    mock_state = np.random.randn(10, 10)
     result = await safety_core.safety_check(mock_state)
 
     return {
