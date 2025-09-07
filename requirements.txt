@@ -14,11 +14,11 @@ jax>=0.4.20
 jaxlib>=0.4.20
 
 # HFCTM-II specific
-numpy>=1.24,<2
-scipy>=1.11,<1.13
-pywavelets>=1.4.1
-networkx>=3.1
 cryptography>=41.0.0
+networkx>=3.1
+numpy>=1.24,<2
+pywavelets>=1.4.1
+scipy>=1.11,<1.13
 
 # Existing ORION
 fastapi>=0.104.0
