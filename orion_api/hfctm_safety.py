@@ -2,10 +2,24 @@
 
 import asyncio
 import numpy as np
-import torch
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 import logging
+
+try:  # pragma: no cover - optional dependency
+    import torch  # type: ignore
+    TORCH_AVAILABLE = True
+except Exception:  # pragma: no cover - import error handling
+    TORCH_AVAILABLE = False
+
+    class _TorchStub:
+        class Tensor:  # pragma: no cover - type stub
+            pass
+
+        def __getattr__(self, name):  # pragma: no cover - defensive
+            raise RuntimeError("PyTorch is not installed")
+
+    torch = _TorchStub()  # type: ignore
 
 # Hardware availability checks
 try:

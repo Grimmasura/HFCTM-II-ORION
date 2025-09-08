@@ -1,9 +1,20 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
-import torch
 import numpy as np
 from orion_api.config import settings
+
+try:  # pragma: no cover - optional dependency
+    import torch  # type: ignore
+    TORCH_AVAILABLE = True
+except Exception:  # pragma: no cover - import error handling
+    TORCH_AVAILABLE = False
+
+    class _TorchStub:
+        def __getattr__(self, name):  # pragma: no cover - defensive
+            raise RuntimeError("PyTorch is not installed")
+
+    torch = _TorchStub()  # type: ignore
 
 app = FastAPI(title="O.R.I.O.N. ∞ API", version="1.0")
 
