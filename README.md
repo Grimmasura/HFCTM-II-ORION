@@ -53,6 +53,20 @@ Run recursive AI performance tests:
 python benchmarks/benchmark_recursive.py
 ```
 
+### Enhanced ORION
+
+Run with:
+```bash
+uvicorn orion_enhanced.orion_complete:create_complete_orion_app --reload --port 8080
+```
+
+Key endpoints:
+
+* `GET /system/status`
+* `POST /system/inference`
+* `POST /system/test`
+* `GET /system/health`
+
 ## Testing
 Install minimal test dependencies and run the unit tests:
 ```bash
