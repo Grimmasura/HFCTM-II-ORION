@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Response
+from orion_enhanced.orion_complete import create_complete_orion_app
 from orion_api.routers import (
     quantum_sync,
     recursive_trust,
@@ -45,6 +46,7 @@ except Exception:  # pragma: no cover - import error handling
         return b""
 
 app = FastAPI(title="O.R.I.O.N. ∞ API")
+app.mount("/enhanced", create_complete_orion_app())
 
 # Initialize safety core on startup
 @app.on_event("startup")

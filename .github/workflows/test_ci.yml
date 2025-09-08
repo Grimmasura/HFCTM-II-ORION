@@ -30,3 +30,12 @@ jobs:
 
       - name: Verify Workflow Execution
         run: echo "✅ GitHub Actions workflow test is running successfully!"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Run Tests
+        run: pytest --disable-warnings -q
