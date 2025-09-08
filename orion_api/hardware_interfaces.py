@@ -4,6 +4,21 @@ from typing import Dict
 
 import numpy as np
 
+try:  # optional sklearn dependency
+    from sklearn.feature_selection import mutual_info_regression
+    _HAVE_SKLEARN = True
+except Exception:  # pragma: no cover
+    _HAVE_SKLEARN = False
+
+    def mutual_info_regression(x, y):  # type: ignore
+        hist_2d, _, _ = np.histogram2d(x.ravel(), y, bins=20)
+        pxy = hist_2d / np.sum(hist_2d)
+        px = pxy.sum(axis=1)
+        py = pxy.sum(axis=0)
+        nz = pxy > 0
+        mi = np.sum(pxy[nz] * np.log(pxy[nz] / (px[:, None] * py[None, :])[nz]))
+        return np.array([mi])
+
 try:  # Majorana1 quantum libraries
     from azure.quantum import Workspace
     from azure.quantum.cirq import AzureQuantumService
@@ -101,8 +116,6 @@ class Majorana1Interface:
             return self._classical_mi_fallback(latent_slice)
 
     def _classical_mi_fallback(self, latent_slice: np.ndarray) -> float:
-        from sklearn.feature_selection import mutual_info_regression
-
         x = latent_slice[:-1].reshape(-1, 1)
         y = latent_slice[1:]
         try:

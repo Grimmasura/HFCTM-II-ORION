@@ -1,7 +1,7 @@
 import asyncio
-import torch
 import pytest
 
+torch = pytest.importorskip("torch")
 from orion_api.hfctm_safety import HFCTMII_SafetyCore, SafetyConfig
 
 
