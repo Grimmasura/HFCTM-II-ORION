@@ -217,7 +217,7 @@ class RecursiveScheduler:
             if node.depth >= self.max_depth:
                 continue
             if not self.budget.can_afford(node.depth + 1):
-                break
+                continue
             children = list(expand_function(node))
             self.expansion_count += 1
             entropy = math.log2(len(children)) if children else 0.0

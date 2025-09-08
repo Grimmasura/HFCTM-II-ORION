@@ -68,3 +68,34 @@ def test_scheduler_runs_and_returns_best_node() -> None:
     assert best.value >= 2
     metrics = scheduler.get_metrics()
     assert metrics["expansions"] > 0
+
+
+def test_scheduler_skips_unaffordable_node_and_continues() -> None:
+    config = SchedulerConfig(beam_size=2, max_depth=4)
+    budget = RecursionBudget(base_cost=1.0, depth_cost_gamma=1.5, remaining_credits=5.0)
+    scheduler = RecursiveScheduler(config=config, budget_config=budget)
+
+    def expand(node: RecursionNode) -> list[RecursionNode]:
+        if node.depth == 0:
+            deep = RecursionNode(
+                state="deep",
+                value=100.0,
+                cost=1.0,
+                depth=3,
+                parent=node,
+            )
+            shallow = RecursionNode(
+                state="shallow",
+                value=1.0,
+                cost=1.0,
+                depth=1,
+                parent=node,
+            )
+            return [deep, shallow]
+        return []
+
+    best = scheduler.schedule_recursion("root", expand)
+    assert best is not None
+    assert best.state == "deep"
+    metrics = scheduler.get_metrics()
+    assert metrics["expansions"] == 2
