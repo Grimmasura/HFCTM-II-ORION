@@ -5,23 +5,34 @@ from orion_config import OrionConfig, QuantumConfig
 
 torch = __import__("pytest").importorskip("torch")
 
-from orion_chiral_trainer import ChiralTrainer
+from orion_chiral_trainer import ChiralTrainer, ChiralConfig
 from orion_quantum_stabilizer import QuantumStabilizer
 from orion_recursive_scheduler import RecursiveScheduler
 from orion_egregore_defense import EgregoreDefense
 
 
+class DummyModel(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.action_dim = 3
+        self.linear = torch.nn.Linear(3, 3)
+
+    def forward(self, x):
+        return self.linear(x)
+
+
 def test_subsystems_smoke():
     cfg = OrionConfig()
-    trainer = ChiralTrainer()
+    model = DummyModel()
+    trainer = ChiralTrainer(model, ChiralConfig())
     stabilizer = QuantumStabilizer(cfg.quantum)
     scheduler = RecursiveScheduler()
     defense = EgregoreDefense()
 
-    policy_orig = torch.randn(2, 3)
-    policy_chiral_mapped = torch.randn(2, 3)
-    js = trainer.js_divergence(policy_orig, policy_chiral_mapped)
-    assert js >= 0
+    x_batch = torch.randn(2, 3)
+    y_batch = torch.tensor([0, 1])
+    loss_dict = trainer.compute_chiral_loss(x_batch, y_batch)
+    assert "total_loss" in loss_dict
 
     rho = torch.eye(2, dtype=torch.complex64)
     rho2 = stabilizer.evolve(rho)
