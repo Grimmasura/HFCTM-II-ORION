@@ -18,7 +18,7 @@ except Exception:  # pragma: no cover - optional dependency
     np = None  # type: ignore
 
 try:  # pragma: no cover - optional dependency
-    from prometheus_client import Counter, Gauge, Histogram
+    from prometheus_client import Counter, Gauge, Histogram, REGISTRY
 except Exception:  # pragma: no cover - optional dependency
     class _NoopMetric:
         def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -34,6 +34,7 @@ except Exception:  # pragma: no cover - optional dependency
             return None
 
     Counter = Gauge = Histogram = _NoopMetric  # type: ignore[misc,assignment]
+    REGISTRY = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -60,22 +61,23 @@ except Exception:  # pragma: no cover
             min_entropy: float = 0.1
             entropy_convergence_window: int = 5
 
+def _get_metric(metric_cls: Any, name: str, documentation: str):
+    if REGISTRY is None:  # type: ignore[truthy-function]
+        return metric_cls(name, documentation)
+    try:
+        return metric_cls(name, documentation)
+    except ValueError:
+        existing = getattr(REGISTRY, "_names_to_collectors", {}).get(name)  # type: ignore[attr-defined]
+        if existing is not None:
+            return existing
+        raise
 
-RECURSION_DEPTH = Gauge(
-    "orion_recursion_depth_sched", "Current recursion depth"
-)
-CREDITS_REMAINING = Gauge(
-    "orion_credits_remaining_sched", "Remaining recursion credits"
-)
-LOOP_DETECTIONS = Counter(
-    "orion_loop_detections_total_sched", "Total loop detections"
-)
-BEAM_SIZE_CURRENT = Gauge(
-    "orion_beam_size_current_sched", "Current beam frontier size"
-)
-RESOURCE_EFFICIENCY = Histogram(
-    "orion_resource_efficiency_sched", "Value per cost ratio"
-)
+
+RECURSION_DEPTH = _get_metric(Gauge, "orion_recursion_depth_sched", "Current recursion depth")
+CREDITS_REMAINING = _get_metric(Gauge, "orion_credits_remaining_sched", "Remaining recursion credits")
+LOOP_DETECTIONS = _get_metric(Counter, "orion_loop_detections_total_sched", "Total loop detections")
+BEAM_SIZE_CURRENT = _get_metric(Gauge, "orion_beam_size_current_sched", "Current beam frontier size")
+RESOURCE_EFFICIENCY = _get_metric(Histogram, "orion_resource_efficiency_sched", "Value per cost ratio")
 
 
 @dataclass

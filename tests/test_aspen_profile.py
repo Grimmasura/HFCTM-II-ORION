@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
 from models.accelerator_utils import (
     get_degradation_profile,
     parity_process,
