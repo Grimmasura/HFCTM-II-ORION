@@ -10,6 +10,7 @@ except Exception as e:  # e.g., httpx missing
 # Ensure project root is on sys.path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
+torch = pytest.importorskip("torch")
 from orion_api.main import app
 
 client = TestClient(app)

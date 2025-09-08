@@ -1,10 +1,12 @@
 import os
 import sys
+import pytest
 from fastapi.testclient import TestClient
-
 
 # Ensure project root is on sys.path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+torch = pytest.importorskip("torch")
 
 from orion_api.main import app
 

@@ -1,4 +1,7 @@
 from fastapi.testclient import TestClient
+import pytest
+
+torch = pytest.importorskip("torch")
 from orion_api.main import app
 
 client = TestClient(app)

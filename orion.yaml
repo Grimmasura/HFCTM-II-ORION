@@ -1,0 +1,11 @@
+quantum:
+  use_psd_projection: false
+chiral:
+  epsilon: 1e-6
+scheduler:
+  c0: 1.0
+  gamma: 0.9
+defense:
+  enabled: false
+monitoring:
+  level: info

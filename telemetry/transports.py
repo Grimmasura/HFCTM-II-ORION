@@ -6,7 +6,10 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import requests
+try:  # optional dependency
+    import requests
+except Exception:  # pragma: no cover
+    requests = None  # type: ignore
 
 
 class TransportProtocol:
@@ -37,9 +40,15 @@ class FileTransport(TransportProtocol):
 class HTTPTransport(TransportProtocol):
     """POST telemetry records to an HTTP endpoint."""
 
-    def __init__(self, url: str, *, session: Optional[requests.Session] = None) -> None:
+    def __init__(self, url: str, *, session: Optional[Any] = None) -> None:
         self.url = url
-        self.session = session or requests.Session()
+        if session is not None:
+            self.session = session
+        elif requests is not None:
+            self.session = requests.Session()
+        else:  # pragma: no cover - requests missing
+            self.session = None
 
     def send(self, record: Dict[str, Any]) -> None:
-        self.session.post(self.url, json=record, timeout=5)
+        if self.session is not None:
+            self.session.post(self.url, json=record, timeout=5)
