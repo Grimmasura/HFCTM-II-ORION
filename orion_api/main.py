@@ -14,7 +14,17 @@ import torch
 from .hfctm_safety import init_safety_core, safety_core, SafetyConfig
 from pathlib import Path
 import subprocess
-from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+try:
+    from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+    PROMETHEUS_AVAILABLE = True
+except Exception:  # pragma: no cover - import error handling
+    PROMETHEUS_AVAILABLE = False
+
+    CONTENT_TYPE_LATEST = "text/plain"
+
+    def generate_latest() -> bytes:  # type: ignore
+        """Fallback when prometheus_client is unavailable."""
+        return b""
 
 app = FastAPI(title="O.R.I.O.N. ∞ API")
 
@@ -79,6 +89,9 @@ async def version() -> dict:
 
 @app.get("/metrics")
 async def metrics() -> Response:
+    """Expose Prometheus metrics if available."""
+    if not PROMETHEUS_AVAILABLE:
+        return Response("Prometheus metrics unavailable", media_type="text/plain")
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 # Add safety endpoint
