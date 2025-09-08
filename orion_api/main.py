@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from orion_api.routers import (
     recursive_ai,
     quantum_sync,
@@ -12,6 +12,9 @@ from models.stability_core import stability_core
 from orion_api.config import settings
 import torch
 from .hfctm_safety import init_safety_core, safety_core, SafetyConfig
+from pathlib import Path
+import subprocess
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 app = FastAPI(title="O.R.I.O.N. ∞ API")
 
@@ -58,6 +61,25 @@ async def health() -> dict:
 async def telemetry() -> dict:
     """Expose a snapshot of the StabilityCore telemetry."""
     return {"telemetry": stability_core.snapshot()}
+
+
+@app.get("/version")
+async def version() -> dict:
+    repo_dir = Path(__file__).resolve().parent.parent
+    try:
+        commit_hash = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo_dir)
+            .decode()
+            .strip()
+        )
+    except Exception:
+        commit_hash = "unknown"
+    return {"version": commit_hash}
+
+
+@app.get("/metrics")
+async def metrics() -> Response:
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 # Add safety endpoint
 @app.get("/api/safety/status")
