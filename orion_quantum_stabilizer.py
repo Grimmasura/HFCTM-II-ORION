@@ -10,9 +10,25 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable, Dict, List
 
-import numpy as np
-import torch
-from prometheus_client import Gauge
+try:  # pragma: no cover - optional dependency
+    import numpy as np
+except Exception:  # pragma: no cover
+    np = None  # type: ignore
+
+try:  # pragma: no cover - optional dependency
+    import torch
+except Exception:  # pragma: no cover
+    torch = None  # type: ignore
+
+try:  # pragma: no cover - optional dependency
+    from prometheus_client import Gauge
+except Exception:  # pragma: no cover
+    class Gauge:  # type: ignore[misc]
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def set(self, *args, **kwargs) -> None:
+            return None
 
 try:  # Optional SciPy dependency
     import scipy.linalg as la  # noqa: F401
