@@ -30,13 +30,15 @@ def test_subsystems_smoke():
     rho2 = stabilizer.evolve(rho)
     assert torch.allclose(torch.trace(rho2).real, torch.tensor(1.0), atol=1e-6)
 
-    result = scheduler.schedule_recursion(
+    best = scheduler.schedule_recursion(
         initial_goal="Solve",
         initial_assumptions=["ctx"],
         expand_function=example_expand_function,
         epsilon=0.01,
     )
-    assert result is not None
+    assert best is not None
+    sched_metrics = scheduler.get_metrics()
+    assert "expansions_total" in sched_metrics
 
     data = np.random.rand(10, 3)
     metrics = defense.analyze(data)

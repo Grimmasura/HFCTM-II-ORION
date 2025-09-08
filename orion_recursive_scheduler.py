@@ -281,6 +281,7 @@ class RecursiveScheduler:
             current = self.frontier.get_best_node()
             if current is None:
                 break
+            current.visits += 1
             RECURSION_DEPTH.set(current.depth)
             if current.depth >= self.max_depth:
                 continue
