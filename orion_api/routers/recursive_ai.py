@@ -3,23 +3,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from models.recursive_ai_model import recursive_model_live
-import logging
 
-logger = logging.getLogger(__name__)
-
-try:
-    from prometheus_client import Histogram
-except Exception:  # pragma: no cover - optional dependency
-    class Histogram:  # type: ignore[misc]
-        """No-op fallback when prometheus_client is unavailable."""
-
-        def __init__(self, *args, **kwargs) -> None:  # noqa: D401
-            pass
-
-        def observe(self, value: float) -> None:
-            return None
-
-    logger.info("prometheus_client not installed; recursive depth metrics disabled")
+from orion_api.telemetry.prometheus import Histogram
 
 recursive_depth_metric = Histogram(
     "orion_recursive_ai_depth",

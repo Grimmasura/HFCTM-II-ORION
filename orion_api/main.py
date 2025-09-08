@@ -10,11 +10,23 @@ from orion_api.routers import (
 )
 from models.stability_core import stability_core
 from orion_api.config import settings
-import torch
 from .hfctm_safety import init_safety_core, safety_core, SafetyConfig
 from pathlib import Path
 import subprocess
-from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+
+try:  # pragma: no cover - optional dependency
+    import torch  # type: ignore
+except Exception:  # pragma: no cover
+    torch = None  # type: ignore
+
+try:  # pragma: no cover - optional dependency
+    from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+except Exception:  # pragma: no cover
+    CONTENT_TYPE_LATEST = "text/plain; version=0.0.4; charset=utf-8"
+
+    def generate_latest() -> bytes:
+        """Fallback generator when prometheus_client is missing."""
+        return b""
 
 app = FastAPI(title="O.R.I.O.N. ∞ API")
 
@@ -86,8 +98,9 @@ async def metrics() -> Response:
 async def safety_status():
     if not safety_core:
         return {"error": "Safety core not initialized"}
+    if torch is None:
+        return {"error": "Torch not installed"}
 
-    # Mock safety check
     mock_state = torch.randn(10, 10)
     result = await safety_core.safety_check(mock_state)
 
