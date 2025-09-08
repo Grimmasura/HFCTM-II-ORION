@@ -12,9 +12,10 @@ from fastapi import APIRouter
 
 def test_metrics_without_prometheus(monkeypatch):
     """The /metrics endpoint should handle missing prometheus_client."""
-    # Ensure prometheus_client and main module are re-imported
+    # Ensure prometheus_client and relevant modules are re-imported
     monkeypatch.delitem(sys.modules, "prometheus_client", raising=False)
     monkeypatch.delitem(sys.modules, "orion_api.main", raising=False)
+    monkeypatch.delitem(sys.modules, "orion_api.telemetry.prometheus", raising=False)
 
     # Provide dummy modules to avoid heavy dependencies
     dummy_pkg = types.ModuleType("orion_api")
