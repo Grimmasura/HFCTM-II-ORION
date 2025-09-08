@@ -7,3 +7,5 @@ azure-quantum>=0.13.0,<0.14.0
 jax>=0.4.20,<0.5.0
 jaxlib>=0.4.20,<0.5.0
 pywavelets>=1.4.1,<1.5.0
+scikit-learn>=1.4.2,<1.5.0
+scipy>=1.11.0,<1.12.0
