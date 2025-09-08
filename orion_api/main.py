@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Response
 from orion_api.routers import (
-    recursive_ai,
     quantum_sync,
     recursive_trust,
     egregore_defense,
@@ -8,9 +7,28 @@ from orion_api.routers import (
     knowledge_expansion,
     perception,
 )
+try:  # pragma: no cover - optional router
+    from orion_api.routers import recursive_ai
+    RECURSIVE_ROUTER_AVAILABLE = True
+except Exception:  # pragma: no cover - missing deps
+    RECURSIVE_ROUTER_AVAILABLE = False
+
 from models.stability_core import stability_core
 from orion_api.config import settings
-import torch
+try:  # pragma: no cover - optional dependency
+    import torch  # type: ignore
+    TORCH_AVAILABLE = True
+except Exception:  # pragma: no cover - import error handling
+    TORCH_AVAILABLE = False
+
+    class _TorchStub:
+        """Minimal stub used when PyTorch is unavailable."""
+
+        def __getattr__(self, name):  # pragma: no cover - defensive
+            raise RuntimeError("PyTorch is not installed")
+
+    torch = _TorchStub()  # type: ignore
+
 from .hfctm_safety import init_safety_core, safety_core, SafetyConfig
 from pathlib import Path
 import subprocess
@@ -44,7 +62,12 @@ async def safety_middleware(request, call_next):
     return response
 
 # Include routers from orion_api
-app.include_router(recursive_ai.router, prefix="/api/v1/recursive_ai", tags=["Recursive AI"])
+if RECURSIVE_ROUTER_AVAILABLE:  # pragma: no cover - optional router
+    app.include_router(
+        recursive_ai.router,
+        prefix="/api/v1/recursive_ai",
+        tags=["Recursive AI"],
+    )
 app.include_router(quantum_sync.router, prefix="/quantum-sync", tags=["Quantum Sync"])
 app.include_router(recursive_trust.router, prefix="/trust", tags=["Recursive Trust"])
 app.include_router(egregore_defense.router, prefix="/egregore", tags=["Egregore Defense"])
@@ -97,6 +120,8 @@ async def metrics() -> Response:
 # Add safety endpoint
 @app.get("/api/safety/status")
 async def safety_status():
+    if not TORCH_AVAILABLE:
+        return {"error": "PyTorch not installed"}
     if not safety_core:
         return {"error": "Safety core not initialized"}
 
