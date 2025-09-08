@@ -1,5 +1,10 @@
-from models.recursive_ai_model import recursive_model_live
+import pytest
+
+torch = pytest.importorskip("torch")
+pytest.importorskip("transformers")
 from transformers import set_seed
+
+from models.recursive_ai_model import recursive_model_live
 from orion_api.config import settings
 
 def test_recursive_model_base_case():
