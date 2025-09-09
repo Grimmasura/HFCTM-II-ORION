@@ -14,22 +14,54 @@ from collections import defaultdict, deque
 import scipy.stats as stats
 from sklearn.decomposition import PCA
 from sklearn.metrics import mutual_info_score
-from prometheus_client import Gauge, Counter, Histogram, Summary
+from prometheus_client import Gauge, Counter, Histogram, Summary, REGISTRY
 import logging
 import time
 
 logger = logging.getLogger(__name__)
 
+# Prometheus metrics helpers -------------------------------------------------
+
+def _safe_metric(factory, name: str, doc: str, *args, registry=REGISTRY, **kwargs):
+    """Create or reuse a Prometheus metric.
+
+    Multiple imports of this module occur during test discovery which can lead
+    to ``ValueError`` due to duplicate metric registration.  This helper returns
+    an already-registered collector when available, making metric definition
+    idempotent.
+    """
+
+    try:
+        return factory(name, doc, *args, registry=registry, **kwargs)
+    except ValueError:
+        existing = getattr(registry, "_names_to_collectors", {}).get(name)
+        if existing is None:
+            raise
+        return existing
+
+
+def _gauge(name: str, doc: str):
+    return _safe_metric(Gauge, name, doc)
+
+
+def _counter(name: str, doc: str):
+    return _safe_metric(Counter, name, doc)
+
+
+def _histogram(name: str, doc: str, **kwargs):
+    return _safe_metric(Histogram, name, doc, **kwargs)
+
+
 # Prometheus metrics
-CHIRAL_CONSISTENCY_GAUGE = Gauge('orion_chiral_consistency', 'Chiral consistency C_χ')
-COMMON_MODE_EIGENVAL = Gauge('orion_common_mode_eigenval', 'Top eigenvalue λ₁ of correlation matrix')
-ESI_GAUGE = Gauge('orion_egregore_susceptibility_index', 'Egregore Susceptibility Index')
-ASR_GAUGE = Gauge('orion_attack_success_rate', 'Attack Success Rate')
-UTILITY_RETENTION = Gauge('orion_utility_retention', 'Utility retention percentage')
-PROCRUSTES_DRIFT = Gauge('orion_procrustes_drift', 'Embedding Procrustes drift')
-MUTUAL_INFO_GAUGE = Gauge('orion_mutual_information', 'I(Y;O) mutual information')
-RECOVERY_TIME = Histogram('orion_recovery_time', 'Time to recovery after attack')
-DEFENSE_ACTIVATIONS = Counter('orion_defense_activations_total', 'Defense mechanism activations')
+CHIRAL_CONSISTENCY_GAUGE = _gauge('orion_chiral_consistency', 'Chiral consistency C_χ')
+COMMON_MODE_EIGENVAL = _gauge('orion_common_mode_eigenval', 'Top eigenvalue λ₁ of correlation matrix')
+ESI_GAUGE = _gauge('orion_egregore_susceptibility_index', 'Egregore Susceptibility Index')
+ASR_GAUGE = _gauge('orion_attack_success_rate', 'Attack Success Rate')
+UTILITY_RETENTION = _gauge('orion_utility_retention', 'Utility retention percentage')
+PROCRUSTES_DRIFT = _gauge('orion_procrustes_drift', 'Embedding Procrustes drift')
+MUTUAL_INFO_GAUGE = _gauge('orion_mutual_information', 'I(Y;O) mutual information')
+RECOVERY_TIME = _histogram('orion_recovery_time', 'Time to recovery after attack')
+DEFENSE_ACTIVATIONS = _counter('orion_defense_activations_total', 'Defense mechanism activations')
 
 default_handler = logging.StreamHandler()
 logger.addHandler(default_handler)
