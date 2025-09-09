@@ -79,6 +79,51 @@ def _as_matrix(x):
     return x
 
 
+def _ensure_compatible_dims(tensor_a, tensor_b):
+    """Coerce ``tensor_a`` to match ``tensor_b``'s shape.
+
+    The input may be a ``torch.Tensor`` or ``numpy.ndarray`` and can arrive
+    flattened or with mismatched dimensions.  When the number of elements
+    matches we reshape, otherwise we pad or truncate before reshaping.  The
+    original backend (torch vs. numpy), dtype and device are preserved.
+    """
+
+    import numpy as np
+    try:  # optional torch handling
+        import torch as _torch
+    except Exception:  # pragma: no cover
+        _torch = None
+
+    # Fast path: shapes already identical
+    if hasattr(tensor_a, "shape") and hasattr(tensor_b, "shape") and tensor_a.shape == tensor_b.shape:
+        return tensor_a
+
+    # Case 1: same element count -> direct reshape
+    if hasattr(tensor_a, "reshape") and hasattr(tensor_b, "shape"):
+        na = int(np.prod(getattr(tensor_a, "shape", [])))
+        nb = int(np.prod(getattr(tensor_b, "shape", [])))
+        if na == nb:
+            try:
+                return tensor_a.reshape(tensor_b.shape)
+            except Exception:  # pragma: no cover - fall through to pad/truncate
+                pass
+
+    # Case 2: pad or truncate then reshape
+    b_np = tensor_b.detach().cpu().numpy() if hasattr(tensor_b, "detach") else np.asarray(tensor_b)
+    a_np = tensor_a.detach().cpu().numpy() if hasattr(tensor_a, "detach") else np.asarray(tensor_a)
+    needed = int(np.prod(b_np.shape))
+    cur = int(a_np.size)
+    if cur < needed:
+        a_np = np.pad(a_np.flatten(), (0, needed - cur))
+    elif cur > needed:
+        a_np = a_np.flatten()[:needed]
+    a_np = a_np.reshape(b_np.shape)
+
+    if _torch is not None and isinstance(tensor_a, _torch.Tensor):
+        return _torch.from_numpy(a_np).to(tensor_a.dtype).to(tensor_a.device)
+    return a_np
+
+
 class QuantumState:
     """Density matrix representation with basic utilities."""
 
@@ -179,6 +224,14 @@ class LyapunovController:
     def compute_controls(self, current_state: QuantumState) -> np.ndarray:
         rho = _as_matrix(current_state.rho)
         rho_star = _as_matrix(self.target_state.rho)
+
+        if hasattr(rho, "shape") and hasattr(rho_star, "shape") and rho.shape != rho_star.shape:
+            logger.debug(
+                "Reconciling quantum state dims: rho=%s rho_star=%s",
+                getattr(rho, "shape", None),
+                getattr(rho_star, "shape", None),
+            )
+            rho = _ensure_compatible_dims(rho, rho_star)
 
         if isinstance(rho, torch.Tensor) and isinstance(rho_star, torch.Tensor):
             if rho.dtype != rho_star.dtype:
