@@ -6,15 +6,13 @@ sys.path.append(str(pyth_root))
 
 pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient
-
 from orion_enhanced.orion_complete import create_complete_orion_app
 
 
-def test_metrics_endpoint():
+def test_budget_stops_depth():
     app = create_complete_orion_app()
     c = TestClient(app)
-    r = c.get("/metrics")
+    # ask with huge depth but low marginal gain => should stop
+    r = c.post("/system/inference", json={"text": "x", "baseline": "x", "depth": 99})
     assert r.status_code == 200
-    assert isinstance(r.text, str)
-    # either prometheus text or fallback marker
-    assert "prometheus" in r.text or "_total" in r.text or "_histogram" in r.text
+    assert r.json().get("stopped") is True

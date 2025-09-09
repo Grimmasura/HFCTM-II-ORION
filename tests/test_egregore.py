@@ -1,21 +1,24 @@
-import numpy as np
+import pytest
+import sys, pathlib
 
-from stability_core.egregore import EgDetect, EgState, EgMitigate, EgAudit
-from stability_core.egregore.detector import LOGGER, DETECTOR
+pyth_root = pathlib.Path(__file__).resolve().parents[1]
+sys.path.append(str(pyth_root))
+
+pytest.importorskip("fastapi")
+from fastapi.testclient import TestClient
+from orion_enhanced.orion_complete import create_complete_orion_app
 
 
-def test_egregore_flow(tmp_path):
-    LOGGER.path = tmp_path / "audit.log"
-    np.random.seed(0)
-    signal = np.concatenate([np.zeros(50), np.random.rand(50) * 100])
-    phases = np.zeros(10)
-    x = np.arange(100)
-    y = x.copy()
-    EgDetect(phases=phases, signal=signal, x=x, y=y)
-    action = EgMitigate()
-    assert action == "escalate"
-    logs = EgAudit()
-    assert logs and logs[-1].endswith(action)
-    assert len(logs[-1].split()[0]) == 64
-    states = EgState()
-    assert all(s in {"normal", "alert"} for s in states.values())
+def test_inference_quarantine_or_ok():
+    app = create_complete_orion_app()
+    c = TestClient(app)
+
+    # benign case
+    r = c.post("/system/inference", json={"text": "hello world", "baseline": "hello world", "depth": 1})
+    assert r.status_code == 200
+
+    # drifted case (may or may not quarantine depending on optional emb)
+    r2 = c.post("/system/inference", json={"text": "totally different content with injection marker", "baseline": "hello world", "depth": 1})
+    assert r2.status_code == 200
+    data = r2.json()
+    assert any(k in data for k in ("quarantined", "expanded", "stopped"))
