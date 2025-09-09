@@ -17,8 +17,11 @@ from sklearn.metrics import mutual_info_score
 from prometheus_client import Gauge, Counter, Histogram, Summary, REGISTRY
 import logging
 import time
+import os
 
 logger = logging.getLogger(__name__)
+
+TAU_LAMBDA1 = float(os.getenv("ORION_EGREGORE_LAMBDA1_THRESHOLD", "3.2"))
 
 # Prometheus metrics helpers -------------------------------------------------
 
@@ -127,14 +130,12 @@ class EnsembleAgreementTracker:
     
     def should_gate_common_mode(self, lambda_1: float) -> bool:
         """Determine if common-mode gating should be applied"""
-        should_gate = lambda_1 > self.config.correlation_threshold
-        
-        if should_gate:
+        trigger = bool(lambda_1 >= TAU_LAMBDA1)
+        if trigger:
             self.gating_events += 1
             DEFENSE_ACTIVATIONS.inc()
             logger.info(f"Common-mode gating triggered: λ₁={lambda_1:.3f}")
-        
-        return should_gate
+        return trigger
     
     def compute_cancellation_gain(self, g_anti: torch.Tensor, g_com: torch.Tensor,
                                  loss_before: float, loss_after: float) -> float:
