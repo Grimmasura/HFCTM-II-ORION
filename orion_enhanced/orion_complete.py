@@ -18,6 +18,7 @@ def create_complete_orion_app() -> FastAPI:
         return min(1.0, 0.5 + 0.05 * len(text.split()))
     controller = BudgetedRecursionController(Budget())
     qstab = QuantumStabilizer(client=None, metrics=metrics)
+    app.state.quantum_stabilizer = qstab
 
     @app.get("/system/status")
     def status():
