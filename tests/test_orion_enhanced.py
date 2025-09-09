@@ -1,9 +1,4 @@
 import pytest
-import sys, pathlib
-
-pyth_root = pathlib.Path(__file__).resolve().parents[1]
-sys.path.append(str(pyth_root))
-
 from fastapi.testclient import TestClient
 from orion_enhanced.orion_complete import create_complete_orion_app
 

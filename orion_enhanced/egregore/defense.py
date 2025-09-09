@@ -1,102 +1,89 @@
-from __future__ import annotations
-from typing import Optional, Sequence
-from collections import Counter
+import os
 import math
+import numpy as np
+from collections import Counter
+from functools import lru_cache
+import time
 
-try:
-    import numpy as np
-    NUMPY_OK = True
-except Exception:  # pragma: no cover
-    NUMPY_OK = False
-
-try:
-    from sentence_transformers import SentenceTransformer
-    import numpy as np  # ensure available
-    _EMB = SentenceTransformer("all-MiniLM-L6-v2")
-    EMB_OK = True
-except Exception:  # pragma: no cover
-    EMB_OK = False
-    _EMB = None
-
-
-class Quarantine(Exception):
-    pass
-
-
-def _kl(p: Counter, q: Counter) -> float:
-    # simple add-k smoothing
-    k = 1.0
-    vocab = set(p) | set(q)
-    P = [(p[t] + k) for t in vocab]
-    Q = [(q[t] + k) for t in vocab]
-    Zp = sum(P); Zq = sum(Q)
-    return sum((pi/Zp) * math.log((pi/Zp) / (qi/Zq)) for pi, qi in zip(P, Q))
-
-
-def ngram_kl(current: str, baseline: str, n: int = 3) -> Optional[float]:
-    def grams(s: str) -> Counter:
-        toks = s.split()
-        return Counter(tuple(toks[i:i+n]) for i in range(max(0, len(toks)-n+1)))
-    try:
-        return _kl(grams(current), grams(baseline))
-    except Exception:  # pragma: no cover
-        return None
-
-
-def embedding_shift(current: str, baseline: str) -> Optional[float]:
-    if not EMB_OK:
-        return None
-    a = _EMB.encode([current, baseline])
-    # cosine distance
-    num = (a[0] * a[1]).sum()
-    den = (np.linalg.norm(a[0]) * np.linalg.norm(a[1]) + 1e-9)
-    return 1.0 - (num / den)
-
-
-def behavior_signal(err_rate_delta: float, tool_mix_delta: float) -> float:
-    # normalized [0,1] surrogate; tune as needed
-    return max(0.0, min(1.0, 0.5 * abs(err_rate_delta) + 0.5 * abs(tool_mix_delta)))
-
-
-def aggregate_score(values: Sequence[Optional[float]]) -> float:
-    vals = [v for v in values if isinstance(v, (int, float))]
-    if not vals:
-        return 0.0
-    return float(sum(vals) / len(vals))
-
+LAMBDA1_THRESHOLD = float(os.getenv("ORION_EGREGORE_LAMBDA1_THRESHOLD", "3.2"))
 
 class EgregoreDefense:
-    def __init__(self, metrics=None, thresholds=None):
+    def __init__(self, metrics=None):
         self.metrics = metrics
-        self.th = {"kl": 1.2, "emb": 0.28, "beh": 0.35, "final": 0.4}
-        if thresholds:
-            self.th.update(thresholds)
+        self.thresholds = {
+            "kl": 1.2,
+            "embedding": 0.28,
+            "behavior": 0.35,
+            "final": 0.4,
+        }
+        self._emb_model = None
 
-    def score(self, current: str, baseline: str, err_rate_delta: float, tool_mix_delta: float) -> float:
-        s1 = ngram_kl(current, baseline)
-        s2 = embedding_shift(current, baseline)
-        s3 = behavior_signal(err_rate_delta, tool_mix_delta)
-        # require concordance across at least 2 signals above their thresholds
+    def _kl_divergence(self, current: str, baseline: str, n: int = 3) -> float:
+        def ngrams(text: str):
+            toks = text.split()
+            return Counter(tuple(toks[i:i+n]) for i in range(max(0, len(toks)-n+1)))
+        p = ngrams(current)
+        q = ngrams(baseline)
+        k = 1.0
+        vocab = set(p) | set(q)
+        P = [(p[t] + k) for t in vocab]
+        Q = [(q[t] + k) for t in vocab]
+        Zp, Zq = sum(P), sum(Q)
+        return sum((pi/Zp) * math.log((pi/Zp) / (qi/Zq)) for pi, qi in zip(P, Q))
+
+    @lru_cache(maxsize=2048)
+    def _embed_once(self, text: str):
+        if self._emb_model is None:
+            from sentence_transformers import SentenceTransformer
+            self._emb_model = SentenceTransformer("all-MiniLM-L6-v2")
+        return self._emb_model.encode([text])[0]
+
+    def _embedding_shift(self, current: str, baseline: str):
+        try:
+            v1 = self._embed_once(current)
+            v2 = self._embed_once(baseline)
+            dot = float((v1 * v2).sum())
+            den = float(np.linalg.norm(v1) * np.linalg.norm(v2) + 1e-9)
+            return 1.0 - (dot / den)
+        except Exception:
+            return None
+
+    def score_anomaly(self, current: str, baseline: str, err_rate_delta: float = 0.0, tool_mix_delta: float = 0.0) -> float:
+        t0 = time.time()
+        kl_score = self._kl_divergence(current, baseline)
+        t1 = time.time()
+        emb_score = self._embedding_shift(current, baseline)
+        t2 = time.time()
+        behavior_score = 0.5 * abs(err_rate_delta) + 0.5 * abs(tool_mix_delta)
+
         flags = [
-            (s1 is not None and s1 >= self.th["kl"]),
-            (s2 is not None and s2 >= self.th["emb"]),
-            (s3 is not None and s3 >= self.th["beh"]),
+            (kl_score is not None and kl_score >= self.thresholds["kl"]),
+            (emb_score is not None and emb_score >= self.thresholds["embedding"]),
+            (behavior_score >= self.thresholds["behavior"]),
         ]
-        final = aggregate_score([s1, s2, s3]) if sum(flags) >= 2 else 0.0
-        if self.metrics and hasattr(self.metrics, "egregore_anomaly"):
+
+        if sum(flags) >= 2:
+            vals = [v for v in (kl_score, emb_score, behavior_score) if isinstance(v, (int, float))]
+            final_score = float(sum(vals) / len(vals)) if vals else 0.0
+        else:
+            final_score = 0.0
+
+        if self.metrics:
             try:
-                self.metrics.egregore_anomaly.set(final)
+                self.metrics.egregore_anomaly.set(final_score)
+                if hasattr(self.metrics, "recursion_depth"):
+                    self.metrics.recursion_depth.observe(max(1, int((t1 - t0) * 1000)))
+                    self.metrics.recursion_depth.observe(max(1, int((t2 - t1) * 1000)))
             except Exception:
                 pass
-        return final
+        return final_score
 
-    def guard(self, *args, **kwargs):
-        val = self.score(*args, **kwargs)
-        if val >= self.th["final"]:
-            if self.metrics and hasattr(self.metrics, "quarantine_events"):
-                try:
-                    self.metrics.quarantine_events.inc()
-                except Exception:
-                    pass
-            raise Quarantine(f"Quarantined due to egregore anomaly={val:.3f}")
-        return val
+    def should_quarantine(self, *args, **kwargs) -> bool:
+        score = self.score_anomaly(*args, **kwargs)
+        should_gate = score >= self.thresholds["final"]
+        if should_gate and self.metrics:
+            try:
+                self.metrics.quarantine_events.inc()
+            except Exception:
+                pass
+        return should_gate

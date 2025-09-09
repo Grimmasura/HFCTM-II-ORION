@@ -123,3 +123,12 @@ Bench:
 ```bash
 python benchmarks/benchmark_recursive.py
 ```
+
+### Stability Matrix
+
+- Budgeted recursion: **Production**
+- Metrics (/metrics): **Production**
+- Egregore defense: **Experimental** (research; thresholds require validation)
+- Quantum hooks: **Experimental** (placeholder unless a real backend is configured)
+
+Use `/system/warmup` to preload the embedding model and reduce first-request latency.

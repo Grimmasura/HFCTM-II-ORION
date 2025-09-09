@@ -1,56 +1,66 @@
+import os
 try:
-    from prometheus_client import CollectorRegistry, Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+    from prometheus_client import (
+        CollectorRegistry, Counter, Histogram, Gauge,
+        generate_latest, CONTENT_TYPE_LATEST, REGISTRY, multiprocess
+    )
     PROM_AVAILABLE = True
-except Exception:  # pragma: no cover
+except Exception:
     PROM_AVAILABLE = False
 
 
-class _NoOp:
-    def __getattr__(self, name):
-        def _noop(*a, **k):
-            return None
-        return _noop
-
-
 class OrionMetrics:
-    """Prometheus-backed metrics with graceful no-op fallback."""
-    def __init__(self) -> None:
+    """Prometheus-backed metrics with graceful no-op fallback and idempotent registration."""
+
+    def __init__(self):
         self.available = PROM_AVAILABLE
         if self.available:
-            self.registry = CollectorRegistry()
-            self.recursions_active = Gauge(
-                "orion_recursions_active", "Active recursion tasks", registry=self.registry
+            if "PROMETHEUS_MULTIPROC_DIR" in os.environ:
+                self.registry = REGISTRY
+                try:
+                    multiprocess.MultiProcessCollector(self.registry)
+                except Exception:
+                    pass
+            else:
+                self.registry = CollectorRegistry()
+
+            def _names():
+                return getattr(self.registry, "_names_to_collectors", {})
+
+            def _gauge(name, doc):
+                names = _names()
+                return names.get(name) or Gauge(name, doc, registry=self.registry)
+
+            def _counter(name, doc):
+                names = _names()
+                return names.get(name) or Counter(name, doc, registry=self.registry)
+
+            def _histogram(name, doc, **kw):
+                names = _names()
+                return names.get(name) or Histogram(name, doc, registry=self.registry, **kw)
+
+            self.recursions_active = _gauge("orion_recursions_active", "Active recursion tasks")
+            self.recursion_depth = _histogram(
+                "orion_recursion_depth_histogram", "Observed recursion depth",
+                buckets=(1, 2, 3, 5, 8, 13, 21, 34)
             )
-            self.recursion_depth = Histogram(
-                "orion_recursion_depth_histogram",
-                "Observed recursion depth",
-                buckets=(1, 2, 3, 5, 8, 13, 21, 34),
-                registry=self.registry,
-            )
-            self.tasks_inflight = Gauge(
-                "orion_tasks_inflight", "Tasks in flight across agents", registry=self.registry
-            )
-            self.egregore_anomaly = Gauge(
-                "egregore_anomaly_score", "Aggregated egregore anomaly score", registry=self.registry
-            )
-            self.drift_eigen_max = Gauge(
-                "drift_eigenvalue_max", "Max eigenvalue of drift correlation matrix", registry=self.registry
-            )
-            self.quarantine_events = Counter(
-                "policy_quarantine_events_total", "Quarantine events", registry=self.registry
-            )
-            self.quantum_unavailable = Gauge(
-                "quantum_sync_unavailable", "Quantum sync unavailable flag", registry=self.registry
-            )
+            self.egregore_anomaly = _gauge("egregore_anomaly_score", "Aggregated anomaly score")
+            self.quarantine_events = _counter("policy_quarantine_events_total", "Quarantine events")
+            self.tasks_inflight = _gauge("orion_tasks_inflight", "Tasks in flight across agents")
+            self.quantum_unavailable = _gauge("quantum_sync_unavailable", "Quantum sync unavailable flag")
         else:
-            self.registry = None
-            self.recursions_active = _NoOp()
-            self.recursion_depth = _NoOp()
-            self.tasks_inflight = _NoOp()
-            self.egregore_anomaly = _NoOp()
-            self.drift_eigen_max = _NoOp()
-            self.quarantine_events = _NoOp()
-            self.quantum_unavailable = _NoOp()
+            self.recursions_active = self._noop()
+            self.recursion_depth = self._noop()
+            self.egregore_anomaly = self._noop()
+            self.quarantine_events = self._noop()
+            self.tasks_inflight = self._noop()
+            self.quantum_unavailable = self._noop()
+
+    def _noop(self):
+        class NoOp:
+            def __getattr__(self, name):
+                return lambda *a, **k: None
+        return NoOp()
 
     def render(self) -> tuple[str, bytes]:
         if not self.available:

@@ -44,6 +44,11 @@ jobs:
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
+      - name: Export test environment
+        run: |
+          echo "ORION_EGREGORE_LAMBDA1_THRESHOLD=3.0" >> $GITHUB_ENV
+          echo "ORION_TREAT_TORCH_AS_MISSING=1" >> $GITHUB_ENV
+
       - name: Start FastAPI Server
         run: |
           nohup uvicorn orion_api.main:app --host 0.0.0.0 --port 8080 > uvicorn.log 2>&1 &
