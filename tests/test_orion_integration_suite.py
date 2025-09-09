@@ -5,6 +5,7 @@ Minimal tests for core HFCTM-II subsystems as specified in surgical review
 
 import pytest
 pytest.importorskip("numpy", reason="numpy not installed")
+pytest.importorskip("pydantic_settings", reason="pydantic-settings not installed")
 
 import numpy as np
 import tempfile

@@ -1,5 +1,12 @@
 from pathlib import Path
-from pydantic_settings import BaseSettings, SettingsConfigDict
+
+try:  # pragma: no cover - dependency is optional for local dev
+    from pydantic_settings import BaseSettings, SettingsConfigDict
+except Exception as e:  # pragma: no cover
+    raise ImportError(
+        "pydantic-settings is required for ORION config (Pydantic v2). "
+        "Install with: pip install pydantic>=2 pydantic-settings"
+    ) from e
 
 
 class Settings(BaseSettings):

@@ -8,7 +8,14 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+
+try:  # pragma: no cover - allow missing optional dependency locally
+    from pydantic_settings import BaseSettings, SettingsConfigDict
+except Exception as e:  # pragma: no cover
+    raise ImportError(
+        "pydantic-settings is required for ORION configuration (Pydantic v2). "
+        "Install with: pip install pydantic>=2 pydantic-settings"
+    ) from e
 
 
 class ChiralConfig(BaseSettings):
