@@ -1,5 +1,3 @@
-from typing import Optional
-
 try:
     from prometheus_client import CollectorRegistry, Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
     PROM_AVAILABLE = True
