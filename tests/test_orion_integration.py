@@ -1,9 +1,11 @@
-import numpy as np
 import pytest
+pytest.importorskip("numpy", reason="numpy not installed")
+
+import numpy as np
 
 from orion_config import OrionConfig, QuantumConfig
 
-torch = __import__("pytest").importorskip("torch")
+torch = pytest.importorskip("torch")
 
 from orion_chiral_trainer import ChiralTrainer, ChiralConfig
 from orion_quantum_stabilizer import QuantumStabilizer

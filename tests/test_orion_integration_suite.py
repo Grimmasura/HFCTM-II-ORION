@@ -3,8 +3,10 @@ ORION Integration Tests Suite
 Minimal tests for core HFCTM-II subsystems as specified in surgical review
 """
 
-import numpy as np
 import pytest
+pytest.importorskip("numpy", reason="numpy not installed")
+
+import numpy as np
 import tempfile
 import yaml
 from pathlib import Path

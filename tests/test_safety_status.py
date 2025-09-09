@@ -1,3 +1,6 @@
+import pytest
+pytest.importorskip("numpy", reason="numpy not installed")
+
 import importlib
 from fastapi.testclient import TestClient
 import orion_api.main as main
