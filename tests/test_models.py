@@ -1,7 +1,5 @@
 import pytest
 
-pytest.importorskip("pydantic_settings", reason="pydantic-settings not installed")
-
 torch = pytest.importorskip("torch")
 pytest.importorskip("transformers")
 from transformers import set_seed
