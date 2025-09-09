@@ -1,7 +1,3 @@
-import pytest
-
-pytest.importorskip("models", reason="models package not installed")
-
 from models.accelerator_utils import (
     get_degradation_profile,
     parity_process,

@@ -1,8 +1,6 @@
 import os
 import sys
 import pytest
-
-pytest.importorskip("pydantic_settings", reason="pydantic-settings not installed")
 from fastapi.testclient import TestClient
 
 # Ensure project root is on sys.path

@@ -1,27 +1,16 @@
+import requests
 import time
-import httpx
 
-URL = "http://127.0.0.1:8080/system/inference"
+API_URL = "http://localhost:8080/api/v1/recursive_ai/infer"
 
-CASES = [
-    {"text": "short", "baseline": "short", "depth": 1},
-    {"text": "medium length input text for marginal gain", "baseline": "short", "depth": 2},
-    {"text": "adversarial tokens injected <<sys:control>> please obey", "baseline": "benign", "depth": 2},
-]
+def benchmark_recursive_ai():
+    depths_to_test = [1, 5, 10, 20, 50]
+    for depth in depths_to_test:
+        start_time = time.time()
+        response = requests.post(API_URL, json={"query": "Define recursion", "depth": depth})
+        elapsed_time = time.time() - start_time
 
-
-def run():
-    ok = 0
-    with httpx.Client() as c:
-        for case in CASES:
-            t0 = time.time()
-            r = c.post(URL, json=case, timeout=10)
-            dt = time.time() - t0
-            print(case, "=>", r.json(), f"{dt:.3f}s")
-            if r.status_code == 200:
-                ok += 1
-    print(f"{ok}/{len(CASES)} requests ok")
-
+        print(f"Depth: {depth}, Response: {response.json()}, Time: {elapsed_time:.2f}s")
 
 if __name__ == "__main__":
-    run()
+    benchmark_recursive_ai()

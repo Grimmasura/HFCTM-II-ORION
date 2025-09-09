@@ -1,7 +1,3 @@
-import pytest
-pytest.importorskip("numpy", reason="numpy not installed")
-pytest.importorskip("pydantic_settings", reason="pydantic-settings not installed")
-
 import importlib
 from fastapi.testclient import TestClient
 import orion_api.main as main
@@ -12,15 +8,7 @@ def test_safety_status_without_torch():
     client = TestClient(main.app)
     response = client.get("/api/safety/status")
     assert response.status_code == 200
-    error_msg = response.json()["error"].lower()
-    assert any(
-        phrase in error_msg
-        for phrase in [
-            "pytorch not installed",
-            "safety core not initialized",
-            "torch not available",
-        ]
-    ), f"Unexpected error message: {error_msg}"
+    assert response.json()["error"].lower().startswith("pytorch not installed")
 
 
 def test_safety_status_with_stubbed_torch(monkeypatch):

@@ -103,32 +103,3 @@ most deployments this means providing the standard service principal secrets:
 Scripts such as `commit_file.py` can automatically commit changes. To push to a
 remote repository these scripts require a `GITHUB_TOKEN` environment variable.
 Without the token they will create the commit locally and skip the push step.
-
-### ORION Complete (local)
-
-```bash
-uvicorn orion_enhanced.orion_complete:create_complete_orion_app --reload --port 8080
-```
-
-Endpoints:
-
-* `GET /system/status` — liveness
-* `GET /system/health` — basic health
-* `GET /metrics` — Prometheus metrics (fallback text if unavailable)
-* `GET /quantum/status` — quantum stabilizer status
-* `POST /system/inference` — toy recursion + egregore guard demo
-
-Bench:
-
-```bash
-python benchmarks/benchmark_recursive.py
-```
-
-### Stability Matrix
-
-- Budgeted recursion: **Production**
-- Metrics (/metrics): **Production**
-- Egregore defense: **Experimental** (research; thresholds require validation)
-- Quantum hooks: **Experimental** (placeholder unless a real backend is configured)
-
-Use `/system/warmup` to preload the embedding model and reduce first-request latency.

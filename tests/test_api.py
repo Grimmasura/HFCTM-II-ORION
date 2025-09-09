@@ -1,7 +1,3 @@
-import pytest
-pytest.importorskip("numpy", reason="numpy not installed")
-pytest.importorskip("pydantic_settings", reason="pydantic-settings not installed")
-
 from fastapi.testclient import TestClient
 from orion_api.main import app
 

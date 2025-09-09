@@ -25,7 +25,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt','optional-deps.txt','constraints.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt','constraints.txt') }}
           restore-keys: ${{ runner.os }}-pip-
 
       - name: Install deps (with constraints)
@@ -33,7 +33,6 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f constraints.txt ]; then CSTR="-c constraints.txt"; else CSTR=""; fi
           if [ -f requirements.txt ]; then pip install $CSTR -r requirements.txt --prefer-binary; fi
-          if [ -f optional-deps.txt ]; then pip install $CSTR -r optional-deps.txt --prefer-binary; fi
           if [ -f requirements-dev.txt ]; then pip install $CSTR -r requirements-dev.txt --prefer-binary; fi
           python - <<'PY'
           import importlib.util, subprocess, sys
@@ -43,11 +42,6 @@ jobs:
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
-
-      - name: Export test environment
-        run: |
-          echo "ORION_EGREGORE_LAMBDA1_THRESHOLD=3.0" >> $GITHUB_ENV
-          echo "ORION_TREAT_TORCH_AS_MISSING=1" >> $GITHUB_ENV
 
       - name: Start FastAPI Server
         run: |
