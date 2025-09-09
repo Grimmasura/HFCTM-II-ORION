@@ -9,10 +9,16 @@ from __future__ import annotations
 
 import logging
 from typing import Any, Callable, Dict, List
+import math
 
 import numpy as np
 import torch
 from prometheus_client import Gauge
+
+try:  # alias for optional use
+    import numpy as _np
+except Exception:  # pragma: no cover
+    _np = None
 
 try:  # Optional SciPy dependency
     import scipy.linalg as la  # noqa: F401
@@ -40,6 +46,82 @@ COHERENCE_TIME = Gauge("orion_coherence_time", "Estimated coherence time")
 FLOQUET_EIGENVAL_MAX = Gauge(
     "orion_floquet_eigenval_max", "Maximum Floquet eigenvalue magnitude"
 )
+
+
+def _as_matrix(x):
+    """Return ``x`` as an ``(n, n)`` matrix.
+
+    Accepts torch tensors or numpy arrays that may arrive as a flattened
+    vector.  When the length of a 1-D input is a perfect square the vector is
+    reshaped to a square matrix; otherwise the original object is returned.
+    """
+
+    import torch as _torch
+
+    if isinstance(x, _torch.Tensor):
+        if x.ndim == 2 and x.shape[0] == x.shape[1]:
+            return x
+        if x.ndim == 1:
+            n2 = x.numel()
+            n = int(math.isqrt(int(n2)))
+            if n * n == int(n2):
+                return x.reshape(n, n)
+        return x
+
+    if _np is not None and hasattr(x, "ndim"):
+        if x.ndim == 2 and x.shape[0] == x.shape[1]:
+            return x
+        if x.ndim == 1:
+            n2 = x.size
+            n = int(math.isqrt(int(n2)))
+            if n * n == int(n2):
+                return x.reshape(n, n)
+    return x
+
+
+def _ensure_compatible_dims(tensor_a, tensor_b):
+    """Coerce ``tensor_a`` to match ``tensor_b``'s shape.
+
+    The input may be a ``torch.Tensor`` or ``numpy.ndarray`` and can arrive
+    flattened or with mismatched dimensions.  When the number of elements
+    matches we reshape, otherwise we pad or truncate before reshaping.  The
+    original backend (torch vs. numpy), dtype and device are preserved.
+    """
+
+    import numpy as np
+    try:  # optional torch handling
+        import torch as _torch
+    except Exception:  # pragma: no cover
+        _torch = None
+
+    # Fast path: shapes already identical
+    if hasattr(tensor_a, "shape") and hasattr(tensor_b, "shape") and tensor_a.shape == tensor_b.shape:
+        return tensor_a
+
+    # Case 1: same element count -> direct reshape
+    if hasattr(tensor_a, "reshape") and hasattr(tensor_b, "shape"):
+        na = int(np.prod(getattr(tensor_a, "shape", [])))
+        nb = int(np.prod(getattr(tensor_b, "shape", [])))
+        if na == nb:
+            try:
+                return tensor_a.reshape(tensor_b.shape)
+            except Exception:  # pragma: no cover - fall through to pad/truncate
+                pass
+
+    # Case 2: pad or truncate then reshape
+    b_np = tensor_b.detach().cpu().numpy() if hasattr(tensor_b, "detach") else np.asarray(tensor_b)
+    a_np = tensor_a.detach().cpu().numpy() if hasattr(tensor_a, "detach") else np.asarray(tensor_a)
+    needed = int(np.prod(b_np.shape))
+    cur = int(a_np.size)
+    if cur < needed:
+        a_np = np.pad(a_np.flatten(), (0, needed - cur))
+    elif cur > needed:
+        a_np = a_np.flatten()[:needed]
+    a_np = a_np.reshape(b_np.shape)
+
+    if _torch is not None and isinstance(tensor_a, _torch.Tensor):
+        return _torch.from_numpy(a_np).to(tensor_a.dtype).to(tensor_a.device)
+    return a_np
 
 
 class QuantumState:
@@ -140,9 +222,27 @@ class LyapunovController:
         return 0.5 * torch.trace(diff.conj().T @ diff).real.item()
 
     def compute_controls(self, current_state: QuantumState) -> np.ndarray:
-        rho = current_state.rho
-        rho_star = self.target_state.rho
-        rho_diff = rho - rho_star
+        rho = _as_matrix(current_state.rho)
+        rho_star = _as_matrix(self.target_state.rho)
+
+        if hasattr(rho, "shape") and hasattr(rho_star, "shape") and rho.shape != rho_star.shape:
+            logger.debug(
+                "Reconciling quantum state dims: rho=%s rho_star=%s",
+                getattr(rho, "shape", None),
+                getattr(rho_star, "shape", None),
+            )
+            rho = _ensure_compatible_dims(rho, rho_star)
+
+        if isinstance(rho, torch.Tensor) and isinstance(rho_star, torch.Tensor):
+            if rho.dtype != rho_star.dtype:
+                rho = rho.to(rho_star.dtype)
+            if rho.device != rho_star.device:
+                rho = rho.to(rho_star.device)
+            rho_diff = rho - rho_star
+        else:  # numpy path
+            rho = _np.asarray(rho)
+            rho_star = _np.asarray(rho_star)
+            rho_diff = rho - rho_star
         controls: List[float] = []
         for k, H_k in enumerate(self.lindblad.H_controls):
             if k < len(self.config.lyapunov_kappa):
@@ -157,12 +257,22 @@ class LyapunovController:
 
     def evolve_step(self, current_state: QuantumState, dt: float) -> QuantumState:
         controls = self.compute_controls(current_state)
-        rho_vec = current_state.rho.flatten().numpy()
-        rho_new_vec = odeint(
-            self.lindblad.lindblad_rhs, rho_vec, [0.0, dt], args=(controls,)
-        )[-1]
+
+        rho_vec_c = current_state.rho.flatten().detach().cpu().numpy().astype(np.complex128)
+
+        def rhs_real(y, t, controls):
+            N2 = y.size // 2
+            z = y[:N2] + 1j * y[N2:]
+            dzdt = self.lindblad.lindblad_rhs(z, t, controls)
+            return np.concatenate([dzdt.real, dzdt.imag])
+
+        y0 = np.concatenate([rho_vec_c.real, rho_vec_c.imag])
+        sol = odeint(rhs_real, y0, [0.0, dt], args=(controls,), mxstep=5000)
+        z_final = sol[-1]
+        N2 = z_final.size // 2
+        rho_vec_final = z_final[:N2] + 1j * z_final[N2:]
         rho_new = torch.tensor(
-            rho_new_vec.reshape(self.lindblad.dim, self.lindblad.dim),
+            rho_vec_final.reshape(self.lindblad.dim, self.lindblad.dim),
             dtype=torch.complex64,
         )
         rho_new = (rho_new + rho_new.conj().T) / 2

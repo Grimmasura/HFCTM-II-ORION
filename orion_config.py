@@ -7,8 +7,15 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field, BaseModel
+
+try:  # pragma: no cover - allow missing optional dependency locally
+    from pydantic_settings import BaseSettings, SettingsConfigDict
+except Exception as e:  # pragma: no cover
+    raise ImportError(
+        "pydantic-settings is required for ORION configuration (Pydantic v2). "
+        "Install with: pip install pydantic>=2 pydantic-settings"
+    ) from e
 
 
 class ChiralConfig(BaseSettings):
@@ -31,6 +38,13 @@ class ChiralConfig(BaseSettings):
     )
 
 
+class SLA(BaseModel):
+    memory_limit_mb: int = Field(1024, ge=0)
+    wall_time_limit: float = Field(300.0, gt=0)
+    token_limit: int | None = Field(None, ge=0)
+    model_config = dict(extra="allow")
+
+
 class SchedulerConfig(BaseSettings):
     """Recursive scheduler configuration"""
 
@@ -40,10 +54,12 @@ class SchedulerConfig(BaseSettings):
     beam_size: int = Field(10, description="Beam search frontier size")
     max_depth: int = Field(20, description="Maximum recursion depth")
 
-    # SLA limits
+    # SLA limits (backwards compat)
     wall_time_limit: float = Field(300.0, description="Wall time limit (seconds)")
     memory_limit_mb: float = Field(1024.0, description="Memory limit (MB)")
     token_limit: int = Field(100000, description="Token limit")
+
+    sla: SLA = Field(default_factory=SLA)
 
     # UCT parameters
     c_explore: float = Field(1.41, description="UCT exploration constant")
@@ -62,6 +78,8 @@ class SchedulerConfig(BaseSettings):
     entropy_convergence_window: int = Field(
         5, description="Entropy convergence window"
     )
+
+    model_config = SettingsConfigDict(extra="allow")
 
 
 class QuantumConfig(BaseSettings):
@@ -177,7 +195,7 @@ class ORIONConfig(BaseSettings):
     checkpoint_interval: int = Field(1000, description="Checkpoint save interval")
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_prefix="ORION_", case_sensitive=False
+        env_file=".env", env_prefix="ORION_", case_sensitive=False, extra="allow"
     )
 
     @classmethod
