@@ -106,8 +106,6 @@ Without the token they will create the commit locally and skip the push step.
 
 ## Arch Linux (AUR-style)
 
-Arch users can build and install from the repo root:
-
 ```bash
 sudo pacman -S --needed base-devel git
 git clone https://github.com/Grimmasura/HFCTM-II-ORION.git
@@ -115,4 +113,4 @@ cd HFCTM-II-ORION
 makepkg -si
 ```
 
-See `README-arch.md` for details, systemd usage, and optional dependencies.
+See `README-arch.md` for systemd usage and optional dependencies.

@@ -9,7 +9,6 @@ Environment=PYTHONPATH=/opt/hfctm-ii-orion
 WorkingDirectory=/opt/hfctm-ii-orion
 ExecStart=/usr/bin/orion-api
 Restart=on-failure
-# Uncomment if you add a dedicated service account:
 # User=orion
 # Group=orion
 
