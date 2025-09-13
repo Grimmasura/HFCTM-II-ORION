@@ -9,7 +9,7 @@ license=('GPL2')
 depends=(
   'python'
   'python-fastapi'
-  'python-uvicorn'
+  'uvicorn'
   'python-numpy'
   'python-pydantic'
   'python-httpx'
