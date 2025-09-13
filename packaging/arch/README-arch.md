@@ -18,5 +18,4 @@ ORION_PORT=8080 orion-api
 - Env: /etc/orion/orion.env
 
 ## Optional deps
-sudo pacman -S python-scipy python-scikit-learn python-prometheus-client
-# DL backend (optional): python-pytorch or python-pytorch-cuda
+sudo pacman -S python-pytorch  # or python-pytorch-cuda

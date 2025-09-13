@@ -1,7 +1,7 @@
 # Maintainer: Joshua-friendly recipe via ChatGPT
 pkgname=hfctm-ii-orion-git
 pkgver=0
-pkgrel=2
+pkgrel=3
 pkgdesc="Omniversal Recursive Intelligence for Ontological Navigation (HFCTM-II-ORION)"
 arch=('x86_64')
 url='https://github.com/Grimmasura/HFCTM-II-ORION'
@@ -10,17 +10,18 @@ license=('GPL2')
 depends=(
   'python'
   'python-fastapi'
-  'uvicorn'           # Arch package name (NOT python-uvicorn)
+  'uvicorn'
   'python-numpy'
   'python-pydantic'
   'python-httpx'
   'python-psutil'
+  'python-scipy'
+  'python-scikit-learn'
+  'python-prometheus-client'
 )
 optdepends=(
-  'python-scipy: quantum stabilizer & ODE solvers'
-  'python-scikit-learn: metrics and validation utilities'
-  'python-torch: deep learning backends'
-  'python-prometheus-client: /metrics endpoint'
+  'python-pytorch: deep learning backends (CPU)'
+  'python-pytorch-cuda: deep learning backends (CUDA)'
 )
 makedepends=('git')
 
@@ -38,7 +39,7 @@ prepare() {
 }
 
 build() {
-  : # nothing to build; python project without pyproject
+  :
 }
 
 package() {
