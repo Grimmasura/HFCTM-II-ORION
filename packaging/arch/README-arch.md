@@ -8,7 +8,7 @@ makepkg -si
 
 ## Run
 sudo systemctl enable --now orion-api.service
-# or:
+# or run directly:
 ORION_PORT=8080 orion-api
 
 ## Paths
@@ -16,3 +16,7 @@ ORION_PORT=8080 orion-api
 - CLI: /usr/bin/orion-api
 - Service: /usr/lib/systemd/system/orion-api.service
 - Env: /etc/orion/orion.env
+
+## Optional deps
+sudo pacman -S python-scipy python-scikit-learn python-prometheus-client
+# DL backend (optional): python-pytorch or python-pytorch-cuda
