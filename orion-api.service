@@ -1,0 +1,17 @@
+[Unit]
+Description=HFCTM-II-ORION API Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=PYTHONPATH=/opt/hfctm-ii-orion
+WorkingDirectory=/opt/hfctm-ii-orion
+ExecStart=/usr/bin/orion-api
+Restart=on-failure
+# Uncomment if you add a dedicated service account:
+# User=orion
+# Group=orion
+
+[Install]
+WantedBy=multi-user.target
