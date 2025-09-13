@@ -1,7 +1,7 @@
 # Maintainer: Joshua-friendly recipe via ChatGPT
 pkgname=hfctm-ii-orion-git
 pkgver=0
-pkgrel=1
+pkgrel=2
 pkgdesc="Omniversal Recursive Intelligence for Ontological Navigation (HFCTM-II-ORION)"
 arch=('x86_64')
 url='https://github.com/Grimmasura/HFCTM-II-ORION'
@@ -24,15 +24,8 @@ optdepends=(
 )
 makedepends=('git')
 
-# Include auxiliary files so they exist in ${srcdir} at package() time
-source=(
-  "git+${url}.git"
-  "orion-api"
-  "orion-api.service"
-  "README-arch.md"
-  "orion.env.example"
-)
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+source=("git+${url}.git")
+sha256sums=('SKIP')
 
 pkgver() {
   cd "${srcdir}/HFCTM-II-ORION"
@@ -40,7 +33,8 @@ pkgver() {
 }
 
 prepare() {
-  chmod +x "${srcdir}/orion-api"
+  cd "${srcdir}/HFCTM-II-ORION"
+  chmod +x packaging/arch/orion-api
 }
 
 build() {
@@ -48,23 +42,25 @@ build() {
 }
 
 package() {
+  cd "${srcdir}/HFCTM-II-ORION"
+
   # Code payload
   install -d "${pkgdir}/opt/hfctm-ii-orion"
-  cp -a "${srcdir}/HFCTM-II-ORION"/. "${pkgdir}/opt/hfctm-ii-orion/"
+  cp -a . "${pkgdir}/opt/hfctm-ii-orion/"
 
   # CLI wrapper
-  install -Dm755 "${srcdir}/orion-api" \
+  install -Dm755 "packaging/arch/orion-api" \
     "${pkgdir}/usr/bin/orion-api"
 
   # systemd unit
-  install -Dm644 "${srcdir}/orion-api.service" \
+  install -Dm644 "packaging/arch/orion-api.service" \
     "${pkgdir}/usr/lib/systemd/system/orion-api.service"
 
   # env example
-  install -Dm644 "${srcdir}/orion.env.example" \
+  install -Dm644 "packaging/arch/orion.env.example" \
     "${pkgdir}/etc/orion/orion.env"
 
   # docs
-  install -Dm644 "${srcdir}/README-arch.md" \
+  install -Dm644 "packaging/arch/README-arch.md" \
     "${pkgdir}/usr/share/doc/${pkgname}/README-arch.md"
 }

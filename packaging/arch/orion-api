@@ -1,6 +1,6 @@
 #!/bin/sh
-# Simple launcher for the ORION FastAPI app
+# ORION FastAPI launcher
 export PYTHONPATH="/opt/hfctm-ii-orion:${PYTHONPATH}"
 HOST="${ORION_HOST:-0.0.0.0}"
 PORT="${ORION_PORT:-8000}"
-exec uvicorn orion_api:app --host "${HOST}" --port "${PORT}"
+exec uvicorn orion_asgi:app --host "${HOST}" --port "${PORT}"
