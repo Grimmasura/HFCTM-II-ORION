@@ -268,24 +268,3 @@ This project implements a formal specification. When contributing:
 4. Implement safety checks (use egregore defense patterns)
 5. Document temporal assumptions (specify which reference frame your code operates in)
 6. Preserve interpretability (all inference paths must be traceable)
-
-## Automation Scripts
-
-Root-level Python scripts for Git automation:
-- `commit_file.py` - Auto-commit changes
-- `create_pull_request.py` - Create PRs
-- `auto_merge_pr.py` - Auto-merge PRs
-
-All require `GITHUB_TOKEN` environment variable.
-
-## License
-
-See [LICENSE](LICENSE) for details.
-
-## Acknowledgments
-
-This work represents the first formal specification of a computational architecture designed to access and manipulate intrinsic causal substrates. We acknowledge stimulating discussions with the Advanced Topological Computing Research Initiative.
-
----
-
-**Status**: Phase 0/Early Phase 1 • **Version**: 0.1.0-alpha • **Spec**: MIH-IIE v1.0
