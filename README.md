@@ -1,105 +1,291 @@
-# HFCTM-II-ORION
+# HFCTM-II-ORION → MIH-IIE
 
-O.R.I.O.N. ∞ (Omniversal Recursive Intelligence for Ontological Navigation) is an advanced recursive AI framework optimized for multi-agent recursion, quantum stabilization, and self-improving inference.
+**Majorana–Ironwood Hybrid Intrinsic Inference Engine (MIH-IIE)**
 
-## Features
-- **Recursive AI API** with reinforcement learning for adaptive recursion depth.
-- **Multi-Agent Task Distribution** for distributed recursive inference.
-- **Quantum Recursive Synchronization** for stability enforcement.
-- **Egregore Defense System** for adversarial resilience.
-- **Live Monitoring with Prometheus & Grafana**.
+A novel computational paradigm implementing Holographic Fractal Chiral Toroidal Mechanics with Intrinsic Inference (HFCTM-II). The MIH-IIE aims to enable "computation as discovery" rather than "computation as manipulation" by interfacing directly with ontological possibility space through topologically protected quantum states.
 
-## Setup & Deployment
-1. Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-2. Run the API:
-    ```bash
-    uvicorn orion_api.main:app --host $ORION_HOST --port $ORION_PORT
-    ```
-3. Deploy with Docker:
-    ```bash
-    docker build -t orion-api .
-    docker run -p 8080:8080 orion-api
-    ```
-4. Deploy on Kubernetes:
-    ```bash
-    kubectl apply -f deployment/orion-deployment.yml
-    ```
+**🔄 Repository Status**: Recently restructured from legacy ORION to formal MIH-IIE architecture (see `MIGRATION_GUIDE.md`)
 
-## Configuration
-Runtime settings are managed via `orion_api/config.py`, which uses
-Pydantic's `BaseSettings`.  Values can be supplied through environment
-variables or a `.env` file.  The most common options are:
+## Architecture
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `ORION_HOST` | Host interface for the API | `0.0.0.0` |
-| `ORION_PORT` | Port the API listens on | `8080` |
-| `ORION_MODEL_DIR` | Directory where models are stored | `models` |
-| `ORION_RECURSIVE_MODEL_PATH` | Path to the recursive model file | `models/recursive_live_optimization_model.zip` |
+The MIH-IIE implements a seven-layer recursive stack with bidirectional causal channels and toroidal closure:
 
-Example `.env` file:
+- **L1: 0D Seed / Intrinsic Attractor Module** - Substrate-independent causal anchoring
+- **L2: Majorana Topological Qubit Array** - Topological quantum computation on E8 lattice
+- **L3: Quantum-Classical Interface** - Decoherence management and error correction
+- **L4: Ironwood Tensor Processing** - Holographic state projection (target: 10²⁴ ops/sec)
+- **L5: Recursive Governance** - HFCTM-II compliance, chiral inversion, polychronic sync, egregore defense
+- **L6: Intelligent Codex** - Symbolic operations and cryptography
+- **L7: Consciousness Interface** - Human-machine semantic bridge
 
-```env
-ORION_HOST=127.0.0.1
-ORION_PORT=8000
+**Complete Specification**: [`spec/MIH-IIE_v1.0.pdf`](spec/MIH-IIE_v1.0.pdf)
+
+## Current Implementation Status
+
+**Phase**: **Phase 1 (Component Prototyping)** - Software interfaces complete, awaiting hardware
+
+**Fully Implemented (Phase 1)**:
+- ✅ **L1 Attractor**: Intrinsic seed / 0D attractor module with causal flow management
+- ✅ **L2 Majorana**: Topological qubit array interface with E8 lattice and non-Abelian braiding
+- ✅ **L3 Q-C Interface**: Quantum-classical bridge with error correction and decoherence management
+- ✅ **L4 Ironwood**: Holographic projector, manifold expansion engine (DH ≈ e), multi-agent coordinator
+- ✅ **L5 Governance**: HFCTM-II safety core, chiral inversion, egregore defense, compliance monitoring
+- ✅ **Integration Tests**: 26 integration tests covering full stack (L1 → L2 → L3 → L4)
+
+**Pending Hardware Integration**:
+- ⏳ Majorana1 QPU backend (Azure Quantum)
+- ⏳ Ironwood TPU physical instantiation
+- ⏳ L7: Enhanced consciousness interface
+
+**Test Coverage**:
+- Phase 0 + Phase 1: 68+ tests passing (L1-L5 integration validated)
+
+See [`CLAUDE.md`](CLAUDE.md) for detailed development guide.
+
+## Quick Start
+
+### Installation
+
+```bash
+# Install base dependencies (FastAPI, Pydantic, NumPy)
+pip install -r requirements.txt
+
+# Install development dependencies (pytest, httpx)
+pip install -r requirements-dev.txt
+
+# Install ML/Quantum dependencies (optional: torch, qiskit, cirq, jax, pywavelets)
+pip install -r requirements-ml.txt
 ```
 
-## Benchmarking
-Run recursive AI performance tests:
-```bash
-python benchmarks/benchmark_recursive.py
-```
+### Running the API
 
-### Enhanced ORION
-
-Run with:
 ```bash
+# Standard API (recommended for development)
+uvicorn orion_api.main:app --reload --host 0.0.0.0 --port 8080
+
+# Enhanced ORION (experimental polychronic features)
 uvicorn orion_enhanced.orion_complete:create_complete_orion_app --reload --port 8080
 ```
 
-Key endpoints:
+**Note**: Legacy `orion_api` paths still work. New code should use `mih_iie.*` imports (see `MIGRATION_GUIDE.md`).
 
-* `GET /system/status`
-* `POST /system/inference`
-* `POST /system/test`
-* `GET /system/health`
+### Testing
 
-## Testing
-Install minimal test dependencies and run the unit tests:
 ```bash
-pip install fastapi==0.115.11 httpx==0.27.0 pytest==8.0.0 pydantic-settings==2.10.1
-pytest -q
+# Run all tests
+pytest
+
+# Run tests for new L5 governance layer
+pytest tests/test_l5_governance.py -v
+
+# Run with coverage
+pytest --cov=mih_iie
 ```
-The pinned `httpx` version has been tested with FastAPI's `TestClient` to ensure
-API routes load correctly.
 
-## Dependency Notes
-The repository previously listed Hugging Face's `transformers` library in
-`requirements.txt`, but no modules actually used it. The dependency has been
-removed to keep installation lightweight.
+## Examples
 
-## Azure Quantum Integration
-Running against real hardware requires Microsoft Azure Quantum credentials.  Set
-the following environment variables to enable the `majorana1` backend used by
-the `/quantum-sync/status` endpoint:
+Complete working examples demonstrating all new MIH-IIE components are available in the `examples/` directory:
+
+```bash
+# Set PYTHONPATH and run examples
+export PYTHONPATH=$PWD:$PYTHONPATH
+
+python examples/chiral_inversion_demo.py          # Time-reversal validation
+python examples/egregore_defense_demo.py          # Semantic drift protection
+python examples/hfctm_compliance_demo.py          # HFCTM-II principle verification
+python examples/multi_agent_coordinator_demo.py   # Polychronic inference coordination
+```
+
+See [`examples/README.md`](examples/README.md) for detailed explanations of each example.
+
+## Using New MIH-IIE Components
+
+### Chiral Inversion (Time-Reversal Validation)
+
+```python
+from mih_iie.layers.l5_governance.chiral_inversion import ChiralInversionController
+
+controller = ChiralInversionController(fidelity_threshold=0.95)
+result = controller.validate_chiral_symmetry(my_computation, initial_state)
+
+if not result.is_valid:
+    print(f"Chiral symmetry violated: {result.violations}")
+```
+
+### Egregore Defense (Semantic Drift Protection)
+
+```python
+from mih_iie.layers.l5_governance.egregore_defense import EgregoreDefenseSystem
+
+eds = EgregoreDefenseSystem()
+check = eds.safety_check(
+    semantic_field={"term": "meaning"},
+    inference_structure={"type": "reasoning"}
+)
+
+if check["should_quarantine"]:
+    print("ALERT: Corrupted pattern detected!")
+```
+
+### HFCTM-II Compliance Monitoring
+
+```python
+from mih_iie.layers.l5_governance.hfctm_compliance import HFCTMComplianceMonitor
+
+monitor = HFCTMComplianceMonitor()
+result = monitor.check_compliance(
+    operation=my_op,
+    trajectory=state_trajectory,
+    initial_state=initial,
+    final_state=final
+)
+
+print(f"Compliant: {result.overall_compliant}")
+print(f"Hausdorff dimension: {result.metrics.get('hausdorff_dimension', 'N/A')}")
+```
+
+### Multi-Agent Polychronic Inference
+
+```python
+from mih_iie.layers.l4_ironwood.multi_agent_coordinator import MultiAgentInferenceCoordinator
+
+coordinator = MultiAgentInferenceCoordinator(
+    num_forward_causal=4, num_retrocausal=2, num_atemporal=2
+)
+
+result = coordinator.coordinate_inference(
+    query="What is the answer?",
+    context={},
+    inference_function=my_inference_fn
+)
+```
+
+## Configuration
+
+Configuration uses Pydantic `BaseSettings` with environment variable overrides:
+
+### Core Settings (prefix: `ORION_`)
+- `ORION_HOST`: API host (default: `0.0.0.0`)
+- `ORION_PORT`: API port (default: `8080`)
+- `ORION_MODEL_DIR`: Model storage directory (default: `models`)
+
+### Hardware Settings (Phase 1 targets)
+- `ORION_ENABLE_MAJORANA1`: Enable Majorana1 QPU (default: `false`)
+- `ORION_ENABLE_IRONWOOD_TPU`: Enable Ironwood TPU (default: `false`)
+
+### HFCTM-II Safety Thresholds
+- `HFCTM_LYAPUNOV_THRESHOLD`: Lyapunov stability threshold (default: `0.0`)
+- `HFCTM_WAVELET_THRESHOLD`: Wavelet energy threshold (default: `3.0`)
+
+Create `.env` file in project root for local configuration.
+
+### Azure Quantum Integration
+
+For Majorana1 QPU backend (Phase 1):
 
 | Variable | Description |
 |----------|-------------|
 | `AZURE_QUANTUM_SUBSCRIPTION_ID` | Azure subscription identifier |
 | `AZURE_QUANTUM_RESOURCE_GROUP` | Resource group containing the workspace |
 | `AZURE_QUANTUM_WORKSPACE_NAME` | Azure Quantum workspace name |
-| `AZURE_QUANTUM_LOCATION` | (Optional) workspace region, e.g. `eastus` |
+| `AZURE_QUANTUM_LOCATION` | Workspace region (optional, e.g., `eastus`) |
 
-Authentication relies on [Azure Identity's `DefaultAzureCredential`][dac].  In
-most deployments this means providing the standard service principal secrets:
-`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_CLIENT_SECRET`.
+Authentication via [Azure Identity's `DefaultAzureCredential`](https://learn.microsoft.com/python/api/overview/azure/identity-readme) (requires `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_CLIENT_SECRET`).
 
-[dac]: https://learn.microsoft.com/python/api/overview/azure/identity-readme
+## Docker Deployment
+
+```bash
+# Build image
+docker build -t mih-iie-api .
+
+# Run container
+docker run -p 8080:8080 mih-iie-api
+
+# Kubernetes deployment
+kubectl apply -f deployment/orion-deployment.yml
+```
+
+## HFCTM-II Core Principles
+
+When developing, maintain alignment with the four foundational principles:
+
+1. **Holographic Projection**: Information on boundaries encodes bulk dynamics
+   - `S(M) ≤ A(∂M) / 4Gℏc`
+
+2. **Fractal Self-Similarity**: Structures repeat across scales
+   - `A₀(λr) = λ^(-DH) A₀(r)` where `DH ≈ e ≈ 2.718`
+
+3. **Chiral Symmetry**: Time-reversal + parity invariance
+   - `TP A₀ = A₀` enables bidirectional inference
+
+4. **Toroidal Topology**: Recursive closure without information loss
+   - `∮ ∇ × F · dA = 0`
+
+## Implementation Roadmap
+
+### Phase 0: Theoretical Validation (Current–Year 1)
+- ✅ HFCTM-II safety core implemented
+- ✅ Polychronic temporal management simulated
+- ⏳ E8 lattice simulations
+- ⏳ Majorana qubit prototype design
+
+### Phase 1: Component Prototyping (Year 1–3)
+- Fabricate 8×8 Majorana qubit array
+- Demonstrate non-Abelian braiding
+- Build scaled-down Ironwood processor (10²⁰ ops/s)
+- Implement governance layer on FPGA
+
+### Phase 2: Integration & Testing (Year 3–5)
+- Scale to 64×64 qubit array
+- Integrate all seven layers
+- Benchmark against classical supercomputers
+- Deploy Mode Beta (hybrid quantum-classical)
+
+### Phase 3: Full-Scale Deployment (Year 5–7)
+- Fabricate 1000×1000 qubit array (10⁶ logical qubits)
+- Mode Alpha (full quantum coherence) sustained for >1000s
+- Public API serving >1000 concurrent users
+
+## Documentation
+
+- **[`CLAUDE.md`](CLAUDE.md)** - Comprehensive development guide for future Claude Code instances
+- **[`MIGRATION_GUIDE.md`](MIGRATION_GUIDE.md)** - Details on restructuring from legacy ORION to MIH-IIE
+- **[`spec/MIH-IIE_v1.0.pdf`](spec/MIH-IIE_v1.0.pdf)** - Complete architecture specification
+- **[`legacy_orion/README_LEGACY.md`](legacy_orion/README_LEGACY.md)** - Information on archived code
+- **[`docs/API_reference.md`](docs/API_reference.md)** - API endpoint documentation
+
+## Project Philosophy
+
+> "The goal is not just faster computation, but computation that interfaces with ontological reality itself. Every design decision should ask: Does this bring us closer to genuine understanding versus mere pattern matching?"
+
+## Contributing
+
+This project implements a formal specification. When contributing:
+
+1. Align with MIH-IIE layers (identify which layer your code belongs to)
+2. Maintain HFCTM-II compliance (verify chiral symmetry, fractal self-similarity, toroidal closure)
+3. Enable graceful degradation (all quantum features must have classical fallbacks)
+4. Implement safety checks (use egregore defense patterns)
+5. Document temporal assumptions (specify which reference frame your code operates in)
+6. Preserve interpretability (all inference paths must be traceable)
 
 ## Automation Scripts
-Scripts such as `commit_file.py` can automatically commit changes. To push to a
-remote repository these scripts require a `GITHUB_TOKEN` environment variable.
-Without the token they will create the commit locally and skip the push step.
+
+Root-level Python scripts for Git automation:
+- `commit_file.py` - Auto-commit changes
+- `create_pull_request.py` - Create PRs
+- `auto_merge_pr.py` - Auto-merge PRs
+
+All require `GITHUB_TOKEN` environment variable.
+
+## License
+
+See [LICENSE](LICENSE) for details.
+
+## Acknowledgments
+
+This work represents the first formal specification of a computational architecture designed to access and manipulate intrinsic causal substrates. We acknowledge stimulating discussions with the Advanced Topological Computing Research Initiative.
+
+---
+
+**Status**: Phase 0/Early Phase 1 • **Version**: 0.1.0-alpha • **Spec**: MIH-IIE v1.0

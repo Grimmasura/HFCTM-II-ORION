@@ -14,17 +14,7 @@ try:  # pragma: no cover - optional router
 except Exception:  # pragma: no cover - missing deps
     RECURSIVE_ROUTER_AVAILABLE = False
 
-# MIH-IIE imports (new structure)
-try:
-    from mih_iie.core.stability_core import stability_core
-    from mih_iie.layers.l5_governance import init_safety_core, safety_core, SafetyConfig
-    MIH_IIE_AVAILABLE = True
-except ImportError:
-    # Fallback to legacy imports
-    from models.stability_core import stability_core
-    from orion_api.hfctm_safety import init_safety_core, safety_core, SafetyConfig
-    MIH_IIE_AVAILABLE = False
-
+from models.stability_core import stability_core
 from orion_api.config import settings
 try:  # pragma: no cover - optional dependency
     import torch  # type: ignore
@@ -39,6 +29,8 @@ except Exception:  # pragma: no cover - import error handling
             raise RuntimeError("PyTorch is not installed")
 
     torch = _TorchStub()  # type: ignore
+
+from .hfctm_safety import init_safety_core, safety_core, SafetyConfig
 from pathlib import Path
 import subprocess
 try:
@@ -53,11 +45,7 @@ except Exception:  # pragma: no cover - import error handling
         """Fallback when prometheus_client is unavailable."""
         return b""
 
-app_title = "MIH-IIE API" if MIH_IIE_AVAILABLE else "O.R.I.O.N. ∞ API (Legacy)"
-app = FastAPI(
-    title=app_title,
-    description="Majorana–Ironwood Hybrid Intrinsic Inference Engine" if MIH_IIE_AVAILABLE else "Omniversal Recursive Intelligence for Ontological Navigation"
-)
+app = FastAPI(title="O.R.I.O.N. ∞ API")
 app.mount("/enhanced", create_complete_orion_app())
 
 # Initialize safety core on startup
@@ -92,50 +80,10 @@ app.include_router(perception.router, prefix="/api/v1/perception", tags=["Percep
 @app.get("/")
 async def root():
     return {
-        "message": f"Welcome to {'MIH-IIE' if MIH_IIE_AVAILABLE else 'O.R.I.O.N. ∞'} API",
-        "architecture": "MIH-IIE v0.1.0-alpha" if MIH_IIE_AVAILABLE else "Legacy ORION",
+        "message": f"Welcome to O.R.I.O.N. ∞ API",
         "host": settings.host,
         "port": settings.port,
-        "docs": "/docs",
     }
-
-
-@app.get("/architecture")
-async def architecture_info():
-    """Get information about the current architecture."""
-    if MIH_IIE_AVAILABLE:
-        return {
-            "name": "Majorana–Ironwood Hybrid Intrinsic Inference Engine (MIH-IIE)",
-            "version": "0.1.0-alpha",
-            "spec_version": "1.0",
-            "phase": "Phase 0 (Theoretical Validation) → Early Phase 1 (Component Prototyping)",
-            "layers": {
-                "l1": "0D Seed / Intrinsic Attractor Module (Phase 1 target)",
-                "l2": "Majorana Topological Qubit Array (Phase 1 target)",
-                "l3": "Quantum-Classical Interface (Phase 1 target)",
-                "l4": "Ironwood Tensor Processing (Partial - Multi-agent coordinator)",
-                "l5": "Recursive Governance (Implemented - Safety core, compliance, egregore defense)",
-                "l6": "Intelligent Codex (Phase 2 target)",
-                "l7": "Consciousness Interface (Basic - FastAPI endpoints)"
-            },
-            "hfctm_principles": [
-                "Holographic Projection",
-                "Fractal Self-Similarity (DH ≈ e ≈ 2.718)",
-                "Chiral Symmetry (TP A₀ = A₀)",
-                "Toroidal Topology"
-            ],
-            "documentation": {
-                "spec": "spec/MIH-IIE_v1.0.pdf",
-                "dev_guide": "CLAUDE.md",
-                "migration": "MIGRATION_GUIDE.md"
-            }
-        }
-    else:
-        return {
-            "name": "O.R.I.O.N. ∞ (Legacy)",
-            "message": "Using legacy imports. MIH-IIE structure not available.",
-            "recommendation": "Install mih_iie package or check import paths"
-        }
 
 
 @app.get("/health")
