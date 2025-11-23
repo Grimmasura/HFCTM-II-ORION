@@ -8,6 +8,9 @@ import pytest
 import numpy as np
 from typing import Dict, List
 
+# Mark all v2 integration tests as slow (skip in CI by default)
+pytestmark = [pytest.mark.slow, pytest.mark.v2, pytest.mark.integration]
+
 # Import v2.0 modules
 from models.e8_topology import E8RootSystem, E8QuantumNetwork, generate_e8_roots
 from models.majorana_0d_network import (

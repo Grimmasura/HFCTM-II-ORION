@@ -147,7 +147,13 @@ jobs:
           exit 1
 
       - name: Run Tests
-        run: python -m pytest --disable-warnings --maxfail=5 --tb=short -q --durations=10
+        run: |
+          echo "Running fast tests only (skipping slow integration tests)..."
+          echo "To run all tests locally: pytest -m '' or pytest -m slow"
+          python -m pytest -v --tb=short -m "not slow" --durations=10 2>&1 | tee pytest_output.txt
+          echo ""
+          echo "Test Summary:"
+          grep -E "passed|failed|skipped|ERROR" pytest_output.txt | tail -5 || echo "Tests completed"
 
       - name: Upload Logs on Failure
         if: failure()

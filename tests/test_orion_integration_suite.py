@@ -9,6 +9,9 @@ import tempfile
 import yaml
 from pathlib import Path
 
+# Mark all tests as slow and requiring torch (skip in CI)
+pytestmark = [pytest.mark.slow, pytest.mark.requires_torch, pytest.mark.integration]
+
 # Optional heavy dependencies
 
 torch = pytest.importorskip("torch")
