@@ -44,19 +44,45 @@ jobs:
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
+      - name: Install Package in Editable Mode
+        run: |
+          echo "Installing package in editable mode..."
+          pip install -e . --no-deps
+          echo "✓ Package installed"
+
       - name: Verify Python Imports
         run: |
           echo "Verifying main module imports..."
+          echo "Current directory: $(pwd)"
+          echo "Python path:"
+          python -c "import sys; print('\n'.join(sys.path))"
+          echo ""
+          echo "Attempting import..."
           python -c "
           import sys
           try:
               from orion_api import main
               print('✓ Main module imports successfully')
+              print('✓ FastAPI app object:', main.app)
               sys.exit(0)
           except Exception as e:
               print(f'✗ Import failed: {e}')
               import traceback
               traceback.print_exc()
+              print('')
+              print('=== Directory structure ===')
+              import os
+              for root, dirs, files in os.walk('.'):
+                  level = root.replace('.', '').count(os.sep)
+                  indent = ' ' * 2 * level
+                  print(f'{indent}{os.path.basename(root)}/')
+                  subindent = ' ' * 2 * (level + 1)
+                  for file in files[:5]:  # Limit to first 5 files
+                      print(f'{subindent}{file}')
+                  if len(files) > 5:
+                      print(f'{subindent}... and {len(files)-5} more')
+                  if level > 2:  # Limit depth
+                      break
               sys.exit(1)
           "
 
@@ -64,8 +90,19 @@ jobs:
         run: |
           echo "Starting Uvicorn server..."
           nohup uvicorn orion_api.main:app --host 0.0.0.0 --port 8080 > uvicorn.log 2>&1 &
-          echo "Server PID: $!"
+          SERVER_PID=$!
+          echo "Server PID: $SERVER_PID"
           sleep 5  # Give the server initial time to start
+
+          # Check if process is still running
+          if ps -p $SERVER_PID > /dev/null; then
+            echo "✓ Server process is running"
+          else
+            echo "✗ Server process died immediately"
+            echo "=== Early startup logs ==="
+            cat uvicorn.log || echo "No logs available"
+            exit 1
+          fi
 
       - name: Wait for API to Start
         run: |
