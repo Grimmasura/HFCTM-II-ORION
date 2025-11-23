@@ -86,8 +86,8 @@ async def initialize_e8_system(request: E8InitRequest):
         # Create coordination
         _coordination = create_e8_coordination(_root_system)
 
-        # Verify structure
-        verification = _root_system.verify_structure()
+        # Verify structure (skip expensive diameter computation for API performance)
+        verification = _root_system.verify_structure(compute_diameter=False)
 
         return {
             "status": "initialized",
@@ -120,7 +120,7 @@ async def get_e8_status():
             detail="E8 system not initialized. Call /initialize first."
         )
 
-    verification = _root_system.verify_structure()
+    verification = _root_system.verify_structure(compute_diameter=False)
     coord_status = _coordination.verify_coordination()
 
     adjacency = _root_system.adjacency_matrix
@@ -131,7 +131,7 @@ async def get_e8_status():
         num_roots=len(_root_system.roots),
         adjacency_56_regular=is_56_regular,
         coordination_active=coord_status["coordination_active"],
-        diameter=verification["diameter"]
+        diameter=verification["diameter"]  # Theoretical value (3) when not computed
     )
 
 

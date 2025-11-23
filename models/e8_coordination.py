@@ -350,8 +350,8 @@ class E8CoordinationProtocol:
         """Verify full coordination protocol integrity"""
         sync_status = self.synchronizer.check_synchronization()
 
-        # Verify E8 structure
-        structure_valid = self.root_system.verify_structure()
+        # Verify E8 structure (skip expensive diameter computation)
+        structure_valid = self.root_system.verify_structure(compute_diameter=False)
 
         return {
             'synchronization': sync_status,
