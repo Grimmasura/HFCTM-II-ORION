@@ -14,7 +14,7 @@ from typing import List, Dict, Sequence, Tuple, Optional, Set
 import numpy as np
 from abc import ABC, abstractmethod
 
-from models.v2_1.e8 import E8, Vector
+from .e8 import E8, Vector
 
 
 # ==============================================================================
@@ -41,6 +41,7 @@ class TensorNode:
     index: int
     tensor: np.ndarray
     neighbor_indices: List[int]
+    neighbor_axis_map: Dict[int, int] = field(default_factory=dict)  # neighbor id -> tensor axis
     physical_dim: int = 2  # For qubit/Majorana mode
     is_boundary: bool = False
 
@@ -69,19 +70,35 @@ class TensorNetwork:
     def get_neighbors(self, node: int) -> List[int]:
         return self.tensors[node].neighbor_indices
     
+    def _ensure_neighbor_axis(self, node: TensorNode, neighbor: int) -> int:
+        """
+        Ensure a tensor has an explicit axis for a given neighbor.
+
+        If the neighbor was not part of the compressed axis set, append a new
+        bond_dim axis directly before the physical dimension.
+        """
+        if neighbor in node.neighbor_axis_map:
+            return node.neighbor_axis_map[neighbor]
+
+        # Add a new bond axis before the physical dimension
+        tensor = node.tensor
+        tensor = np.repeat(tensor[..., None], self.bond_dim, axis=-1)
+        tensor = np.moveaxis(tensor, -1, -2)  # place before physical dimension
+
+        node.tensor = tensor
+        new_axis = tensor.ndim - 2  # physical dim is last
+        node.neighbor_axis_map[neighbor] = new_axis
+        return new_axis
+
     def contract_edge(self, i: int, j: int) -> np.ndarray:
         """Contract tensors at nodes i and j along their shared edge."""
-        ti = self.tensors[i].tensor
-        tj = self.tensors[j].tensor
-        
-        # Find which axes to contract
-        ni = self.tensors[i].neighbor_indices
-        nj = self.tensors[j].neighbor_indices
-        
-        ai = ni.index(j) if j in ni else 0
-        aj = nj.index(i) if i in nj else 0
-        
-        return np.tensordot(ti, tj, axes=(ai, aj))
+        node_i = self.tensors[i]
+        node_j = self.tensors[j]
+
+        ai = self._ensure_neighbor_axis(node_i, j)
+        aj = self._ensure_neighbor_axis(node_j, i)
+
+        return np.tensordot(node_i.tensor, node_j.tensor, axes=(ai, aj))
 
 
 # ==============================================================================
@@ -236,7 +253,7 @@ def build_e8_tensor_network(
     n = len(e8.roots_scaled)
     tensors: Dict[int, TensorNode] = {}
     edges: List[Tuple[int, int]] = []
-    
+
     for i in range(n):
         neighbors = list(np.where(adjacency[i] == 1)[0])
         
@@ -259,11 +276,15 @@ def build_e8_tensor_network(
             tensor = np.ones(shape) / np.sqrt(np.prod(shape))
         else:
             tensor = np.random.randn(*shape)
-        
+
+        # Map only the first effective_rank neighbors to axes; others are lazily added
+        neighbor_axis_map = {neighbor: axis for axis, neighbor in enumerate(neighbors[:effective_rank])}
+
         tensors[i] = TensorNode(
             index=i,
             tensor=tensor,
             neighbor_indices=neighbors,
+            neighbor_axis_map=neighbor_axis_map,
             physical_dim=physical_dim
         )
         
@@ -279,9 +300,20 @@ def build_e8_tensor_network(
 # Algorithm 12: Bulk State Reconstruction
 # ==============================================================================
 
+def _edge_score(network: TensorNetwork, edge: Tuple[int, int]) -> float:
+    """Heuristic score for choosing contraction order (lower is better)."""
+    i, j = edge
+    ni = len(network.get_neighbors(i))
+    nj = len(network.get_neighbors(j))
+    ti = network.tensors[i].tensor
+    tj = network.tensors[j].tensor
+    return ni + nj + ti.ndim + tj.ndim
+
+
 def optimize_contraction_order(
     network: TensorNetwork,
-    boundary_nodes: Set[int]
+    boundary_nodes: Set[int],
+    max_edges: Optional[int] = None
 ) -> List[Tuple[int, int]]:
     """
     Optimize tensor network contraction order.
@@ -294,44 +326,39 @@ def optimize_contraction_order(
     remaining_edges = list(network.edges)
     order = []
     contracted = set()
-    
+
     # Start from boundary
     active = set(boundary_nodes)
-    
+
+    processed = 0
     while remaining_edges:
         # Find edge involving an active node
-        best_edge = None
-        best_score = float('inf')
-        
-        for edge in remaining_edges:
-            i, j = edge
-            if i in active or j in active:
-                # Score by sum of remaining degrees
-                score = len(network.get_neighbors(i)) + len(network.get_neighbors(j))
-                if score < best_score:
-                    best_score = score
-                    best_edge = edge
-        
-        if best_edge is None:
-            # No edge touching active nodes, pick any
-            best_edge = remaining_edges[0]
-        
+        candidate_edges = [e for e in remaining_edges if e[0] in active or e[1] in active]
+        if not candidate_edges:
+            candidate_edges = remaining_edges
+
+        # Choose edge with lowest heuristic score
+        best_edge = min(candidate_edges, key=lambda e: _edge_score(network, e))
         order.append(best_edge)
         remaining_edges.remove(best_edge)
-        
+        processed += 1
+
         # Update active set
         i, j = best_edge
         active.add(i)
         active.add(j)
         contracted.add((min(i, j), max(i, j)))
-    
+        if max_edges is not None and processed >= max_edges:
+            break
+
     return order
 
 
 def reconstruct_bulk(
     boundary_measurements: Dict[int, BoundaryMeasurement],
     network: TensorNetwork,
-    boundary_nodes: List[int]
+    boundary_nodes: List[int],
+    edge_limit: Optional[int] = None,
 ) -> np.ndarray:
     """
     Algorithm 12: Bulk State Reconstruction
@@ -364,7 +391,7 @@ def reconstruct_bulk(
             network.tensors[node].is_boundary = True
     
     # Optimize contraction order
-    order = optimize_contraction_order(network, set(boundary_nodes))
+    order = optimize_contraction_order(network, set(boundary_nodes), max_edges=edge_limit)
     
     # Contract network
     # This is a simplified sequential contraction

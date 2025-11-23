@@ -16,7 +16,7 @@ from enum import Enum
 import numpy as np
 from abc import ABC, abstractmethod
 
-from models.v2_1.e8 import E8, Vector, RootTuple
+from .e8 import E8, Vector, RootTuple
 
 
 # ==============================================================================

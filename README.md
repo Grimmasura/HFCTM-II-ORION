@@ -273,6 +273,7 @@ When developing, maintain alignment with the four foundational principles:
 - **[`legacy_orion/README_LEGACY.md`](legacy_orion/README_LEGACY.md)** - Information on archived code
 - **[`docs/API_reference.md`](docs/API_reference.md)** - API endpoint documentation
 - **[`docs/notebooks/e8_verification.ipynb`](docs/notebooks/e8_verification.ipynb)** - Deterministic E8 invariant checks (mirrors CI badge)
+- **`models/v2_1/`** - v2.1 spec-aligned E8/coordination/EDS/error-correction/holography modules for validation
 
 ## Project Philosophy
 
