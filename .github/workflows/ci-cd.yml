@@ -50,14 +50,32 @@ jobs:
           pip install -e . --no-deps
           echo "✓ Package installed"
 
+          echo ""
+          echo "Verifying package installation..."
+          pip show mih-iie || echo "⚠ Package mih-iie not shown by pip"
+
+          echo ""
+          echo "Checking installed packages:"
+          pip list | grep -E "fastapi|pydantic|numpy|scipy" || echo "⚠ Core dependencies not found"
+
       - name: Verify Python Imports
         run: |
           echo "Verifying main module imports..."
           echo "Current directory: $(pwd)"
+          echo ""
+          echo "Python version:"
+          python --version
+          echo ""
           echo "Python path:"
           python -c "import sys; print('\n'.join(sys.path))"
           echo ""
-          echo "Attempting import..."
+          echo "Checking critical dependencies first..."
+          python -c "import fastapi; print('✓ fastapi:', fastapi.__version__)" || echo "✗ fastapi not importable"
+          python -c "import numpy; print('✓ numpy:', numpy.__version__)" || echo "✗ numpy not importable"
+          python -c "import scipy; print('✓ scipy:', scipy.__version__)" || echo "✗ scipy not importable"
+          python -c "import pydantic; print('✓ pydantic:', pydantic.__version__)" || echo "✗ pydantic not importable"
+          echo ""
+          echo "Attempting main module import..."
           python -c "
           import sys
           try:
@@ -70,7 +88,7 @@ jobs:
               import traceback
               traceback.print_exc()
               print('')
-              print('=== Directory structure ===')
+              print('=== Debugging Info ===')
               import os
               for root, dirs, files in os.walk('.'):
                   level = root.replace('.', '').count(os.sep)
