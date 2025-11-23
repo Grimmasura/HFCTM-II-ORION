@@ -9,6 +9,9 @@ import numpy as np
 from typing import List, Tuple, Dict, Optional
 from dataclasses import dataclass
 import itertools
+import logging
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class E8Root:
