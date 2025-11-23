@@ -11,7 +11,7 @@ async def test_status_and_inference():
         assert r.json()["system_status"] == "operational"
 
         payload = {"query": "test query", "concepts": ["recursion", "time"]}
-        r = await client.post("/system/inference", params=payload)
+        r = await client.post("/system/inference", json=payload)
         assert r.status_code == 200
         assert "system_coherence" in r.json()
 

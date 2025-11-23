@@ -32,6 +32,19 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+def _to_serializable(obj: Any) -> Any:
+    """Convert numpy types to native Python for JSON serialization."""
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, np.generic):
+        return obj.item()
+    if isinstance(obj, dict):
+        return {k: _to_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_to_serializable(v) for v in obj]
+    return obj
+
 # =============================================================================
 # 1. POLYCHRONIC TEMPORAL MANAGEMENT
 # =============================================================================
@@ -300,16 +313,16 @@ def create_complete_orion_app() -> FastAPI:
         return {"system_status": "operational"}
 
     @app.post("/system/inference")
-    async def system_inference(query: str, concepts: List[str]) -> Dict[str, Any]:
-        temp = orion.run_temporal(query, {"concepts": concepts})
-        intr = orion.run_intrinsic(query, concepts)
+    async def system_inference(request: InferenceRequest) -> Dict[str, Any]:
+        temp = orion.run_temporal(request.query, {"concepts": request.concepts})
+        intr = orion.run_intrinsic(request.query, request.concepts)
         chir = orion.run_chiral(np.random.randn(128))
-        return {
+        return _to_serializable({
             "temporal": temp,
             "intrinsic": intr,
             "chiral": chir,
             "system_coherence": orch.calculate_system_coherence(),
-        }
+        })
 
     @app.post("/system/test")
     async def system_test() -> Dict[str, Any]:
