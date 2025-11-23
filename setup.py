@@ -2,12 +2,21 @@
 Setup configuration for MIH-IIE package.
 """
 from setuptools import setup, find_packages
+import os
+
+# Read README safely
+readme_path = os.path.join(os.path.dirname(__file__), "README.md")
+try:
+    with open(readme_path, "r", encoding="utf-8") as f:
+        long_description = f.read()
+except Exception:
+    long_description = "Majorana–Ironwood Hybrid Intrinsic Inference Engine"
 
 setup(
     name="mih-iie",
     version="0.1.0-alpha",
     description="Majorana–Ironwood Hybrid Intrinsic Inference Engine",
-    long_description=open("README.md").read(),
+    long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests", "tests.*", "legacy_orion", "legacy_orion.*"]),
     python_requires=">=3.8",

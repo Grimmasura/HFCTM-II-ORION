@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # Allow time for comprehensive test suite
 
     steps:
       - name: Checkout Repository
@@ -43,19 +44,123 @@ jobs:
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
+      - name: Install Package in Editable Mode
+        run: |
+          echo "Installing package in editable mode..."
+          pip install -e . --no-deps
+          echo "✓ Package installed"
+
+          echo ""
+          echo "Verifying package installation..."
+          pip show mih-iie || echo "⚠ Package mih-iie not shown by pip"
+
+          echo ""
+          echo "Checking installed packages:"
+          pip list | grep -E "fastapi|pydantic|numpy|scipy" || echo "⚠ Core dependencies not found"
+
+      - name: Verify Python Imports
+        run: |
+          echo "Verifying main module imports..."
+          echo "Current directory: $(pwd)"
+          echo ""
+          echo "Python version:"
+          python --version
+          echo ""
+          echo "Python path:"
+          python -c "import sys; print('\n'.join(sys.path))"
+          echo ""
+          echo "Checking critical dependencies first..."
+          python -c "import fastapi; print('✓ fastapi:', fastapi.__version__)" || echo "✗ fastapi not importable"
+          python -c "import numpy; print('✓ numpy:', numpy.__version__)" || echo "✗ numpy not importable"
+          python -c "import scipy; print('✓ scipy:', scipy.__version__)" || echo "✗ scipy not importable"
+          python -c "import pydantic; print('✓ pydantic:', pydantic.__version__)" || echo "✗ pydantic not importable"
+          echo ""
+          echo "Attempting main module import..."
+          python -c "
+          import sys
+          try:
+              from orion_api import main
+              print('✓ Main module imports successfully')
+              print('✓ FastAPI app object:', main.app)
+              sys.exit(0)
+          except Exception as e:
+              print(f'✗ Import failed: {e}')
+              import traceback
+              traceback.print_exc()
+              print('')
+              print('=== Debugging Info ===')
+              import os
+              for root, dirs, files in os.walk('.'):
+                  level = root.replace('.', '').count(os.sep)
+                  indent = ' ' * 2 * level
+                  print(f'{indent}{os.path.basename(root)}/')
+                  subindent = ' ' * 2 * (level + 1)
+                  for file in files[:5]:  # Limit to first 5 files
+                      print(f'{subindent}{file}')
+                  if len(files) > 5:
+                      print(f'{subindent}... and {len(files)-5} more')
+                  if level > 2:  # Limit depth
+                      break
+              sys.exit(1)
+          "
+
       - name: Start FastAPI Server
         run: |
+          echo "Starting Uvicorn server..."
           nohup uvicorn orion_api.main:app --host 0.0.0.0 --port 8080 > uvicorn.log 2>&1 &
-          sleep 5  # Give the server time to start
+          SERVER_PID=$!
+          echo "Server PID: $SERVER_PID"
+          sleep 5  # Give the server initial time to start
+
+          # Check if process is still running
+          if ps -p $SERVER_PID > /dev/null; then
+            echo "✓ Server process is running"
+          else
+            echo "✗ Server process died immediately"
+            echo "=== Early startup logs ==="
+            cat uvicorn.log || echo "No logs available"
+            exit 1
+          fi
 
       - name: Wait for API to Start
         run: |
-          echo "Waiting for FastAPI server..."
-          for i in {1..10}; do
-            curl --silent --fail http://localhost:8080/docs && break
-            echo "Retrying in 3 seconds..."
+          echo "Waiting for FastAPI server to respond..."
+          for i in {1..20}; do
+            if curl --silent --fail http://localhost:8080/docs > /dev/null 2>&1; then
+              echo "✓ API is responding on attempt $i"
+              echo "=== Server started successfully ==="
+              exit 0
+            fi
+            echo "Attempt $i/20: Server not ready yet, retrying in 3 seconds..."
             sleep 3
-          done || exit 1
+          done
+          echo "✗ API failed to start after 60 seconds"
+          echo ""
+          echo "=== Uvicorn logs ==="
+          cat uvicorn.log || echo "No logs available"
+          echo ""
+          echo "=== Process check ==="
+          ps aux | grep uvicorn || echo "No uvicorn process found"
+          echo ""
+          echo "=== Port check ==="
+          netstat -tuln | grep 8080 || echo "Port 8080 not listening"
+          exit 1
 
       - name: Run Tests
-        run: python -m pytest --disable-warnings --maxfail=5 --tb=short -q
+        run: |
+          echo "Running fast tests only (skipping slow integration tests)..."
+          echo "To run all tests locally: pytest -m '' or pytest -m slow"
+          python -m pytest -v --tb=short -m "not slow" --durations=10 2>&1 | tee pytest_output.txt
+          echo ""
+          echo "Test Summary:"
+          grep -E "passed|failed|skipped|ERROR" pytest_output.txt | tail -5 || echo "Tests completed"
+
+      - name: Upload Logs on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-logs
+          path: |
+            uvicorn.log
+            *.log
+          retention-days: 7

@@ -6,6 +6,24 @@ A novel computational paradigm implementing Holographic Fractal Chiral Toroidal 
 
 **🔄 Repository Status**: Recently restructured from legacy ORION to formal MIH-IIE architecture (see `MIGRATION_GUIDE.md`)
 
+## 🚀 **NEW: v2.0 Architecture Released**
+
+**MIH-IIE v2.0** brings critical architectural breakthroughs:
+
+1. **Majorana Zero Modes ARE 0D Attractors** (not encodings) - Physical realization of dimensionless causal anchors
+2. **E8 as Network Topology in Hilbert Space** (not geometric layout) - 240-node quantum entanglement network
+3. **Frame-Invariant Validation** (replaces static baselines) - Dynamic truth through cross-frame convergence
+
+**v2.0 Implementation**:
+- ✅ 2,091 lines of core functionality across 6 new modules
+- ✅ 25 new REST API endpoints exposing all v2.0 features
+- ✅ Complete integration tests (447 lines)
+- ✅ Comprehensive documentation (1,063 lines)
+
+**Quick Start**: See [`docs/API_v2_Quick_Start.md`](docs/API_v2_Quick_Start.md) for v2.0 API reference
+**Full Documentation**: [`docs/MIH-IIE_v2.0_Implementation.md`](docs/MIH-IIE_v2.0_Implementation.md)
+**Completion Report**: [`MIH-IIE_v2.0_COMPLETION_REPORT.md`](MIH-IIE_v2.0_COMPLETION_REPORT.md)
+
 ## Architecture
 
 The MIH-IIE implements a seven-layer recursive stack with bidirectional causal channels and toroidal closure:

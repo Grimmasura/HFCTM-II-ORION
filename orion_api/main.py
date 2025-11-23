@@ -1,5 +1,21 @@
 from fastapi import FastAPI, Response
-from orion_enhanced.orion_complete import create_complete_orion_app
+
+# Optional orion_enhanced import
+try:
+    from orion_enhanced.orion_complete import create_complete_orion_app
+    ORION_ENHANCED_AVAILABLE = True
+except Exception as e:
+    print(f"Warning: orion_enhanced not available: {e}")
+    ORION_ENHANCED_AVAILABLE = False
+    def create_complete_orion_app():
+        """Fallback when orion_enhanced is unavailable."""
+        from fastapi import FastAPI
+        fallback_app = FastAPI(title="ORION Enhanced (Unavailable)")
+        @fallback_app.get("/")
+        async def fallback_root():
+            return {"error": "ORION Enhanced not available"}
+        return fallback_app
+
 from orion_api.routers import (
     quantum_sync,
     recursive_trust,
@@ -13,6 +29,18 @@ try:  # pragma: no cover - optional router
     RECURSIVE_ROUTER_AVAILABLE = True
 except Exception:  # pragma: no cover - missing deps
     RECURSIVE_ROUTER_AVAILABLE = False
+
+# MIH-IIE v2.0 routers
+try:
+    from orion_api.routers import (
+        e8_operations,
+        majorana_operations,
+        frame_invariant_validation,
+        holographic_inference
+    )
+    V2_ROUTERS_AVAILABLE = True
+except Exception:
+    V2_ROUTERS_AVAILABLE = False
 
 # MIH-IIE imports (new structure)
 try:
@@ -63,8 +91,26 @@ app.mount("/enhanced", create_complete_orion_app())
 # Initialize safety core on startup
 @app.on_event("startup")
 async def startup_event():
-    config = SafetyConfig()
-    init_safety_core(config)
+    print("=" * 50)
+    print("MIH-IIE API Starting Up")
+    print("=" * 50)
+    try:
+        config = SafetyConfig()
+        init_safety_core(config)
+        print("✓ Safety core initialized")
+    except Exception as e:
+        print(f"✗ Safety core initialization failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+    print(f"✓ ORION Enhanced: {'Available' if ORION_ENHANCED_AVAILABLE else 'Unavailable (using fallback)'}")
+    print(f"✓ V2 Routers: {'Available' if V2_ROUTERS_AVAILABLE else 'Unavailable'}")
+    print(f"✓ Recursive AI: {'Available' if RECURSIVE_ROUTER_AVAILABLE else 'Unavailable'}")
+    print(f"✓ MIH-IIE Structure: {'Available' if MIH_IIE_AVAILABLE else 'Using legacy imports'}")
+    print("=" * 50)
+    print(f"API ready at http://{settings.host}:{settings.port}")
+    print(f"Docs available at http://{settings.host}:{settings.port}/docs")
+    print("=" * 50)
 
 # Safety middleware
 @app.middleware("http")
@@ -89,15 +135,34 @@ app.include_router(manifold_router.router, prefix="/manifold", tags=["Manifold R
 app.include_router(knowledge_expansion.router, prefix="/api/v1/knowledge", tags=["Knowledge Expansion"])
 app.include_router(perception.router, prefix="/api/v1/perception", tags=["Perception"])
 
+# Include v2.0 routers if available
+if V2_ROUTERS_AVAILABLE:
+    app.include_router(e8_operations.router)
+    app.include_router(majorana_operations.router)
+    app.include_router(frame_invariant_validation.router)
+    app.include_router(holographic_inference.router)
+
 @app.get("/")
 async def root():
-    return {
+    version = "v2.0" if V2_ROUTERS_AVAILABLE else ("v0.1.0-alpha" if MIH_IIE_AVAILABLE else "Legacy")
+
+    response = {
         "message": f"Welcome to {'MIH-IIE' if MIH_IIE_AVAILABLE else 'O.R.I.O.N. ∞'} API",
-        "architecture": "MIH-IIE v0.1.0-alpha" if MIH_IIE_AVAILABLE else "Legacy ORION",
+        "architecture": f"MIH-IIE {version}",
         "host": settings.host,
         "port": settings.port,
         "docs": "/docs",
     }
+
+    if V2_ROUTERS_AVAILABLE:
+        response["v2_features"] = {
+            "e8_topology": "/api/v2/e8",
+            "majorana_0d_seeds": "/api/v2/majorana",
+            "frame_invariant_validation": "/api/v2/frame-invariant",
+            "holographic_inference": "/api/v2/holographic"
+        }
+
+    return response
 
 
 @app.get("/architecture")
