@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Prevent hanging jobs
+    timeout-minutes: 30  # Allow time for comprehensive test suite
 
     steps:
       - name: Checkout Repository
@@ -129,7 +129,7 @@ jobs:
           exit 1
 
       - name: Run Tests
-        run: python -m pytest --disable-warnings --maxfail=5 --tb=short -q
+        run: python -m pytest --disable-warnings --maxfail=5 --tb=short -q --durations=10
 
       - name: Upload Logs on Failure
         if: failure()
