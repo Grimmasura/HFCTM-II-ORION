@@ -1,7 +1,7 @@
 import numpy as np
 
-from stability_core.egregore import EgDetect, EgState, EgMitigate, EgAudit
-from stability_core.egregore.detector import LOGGER, DETECTOR
+from mih_iie.core.stability.egregore import EgDetect, EgState, EgMitigate, EgAudit
+from mih_iie.core.stability.egregore.detector import LOGGER, DETECTOR
 
 
 def test_egregore_flow(tmp_path):

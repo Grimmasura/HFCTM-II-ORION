@@ -2,7 +2,7 @@ import os
 import urllib.request
 import numpy as np
 import torch
-from models.stability_core import stability_core
+from models.stability_core import mih_iie.core.stability
 from orion_api.config import settings
 
 from transformers import AutoModelForCausalLM, AutoTokenizer

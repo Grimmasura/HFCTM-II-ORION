@@ -6,7 +6,7 @@ ASGI adapter for HFCTM-II-ORION.
 import logging
 
 try:
-    from orion_enhanced_extensions import create_enhanced_orion_api
+    from orion_api.enhanced_extensions import create_enhanced_orion_api
     app = create_enhanced_orion_api()
 except Exception as e:  # pragma: no cover - fallback path
     logging.getLogger("uvicorn.error").exception("Failed to build ORION app", exc_info=e)

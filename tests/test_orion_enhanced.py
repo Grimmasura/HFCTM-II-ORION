@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from orion_enhanced.orion_complete import create_complete_orion_app
+from orion_api.enhanced.orion_complete import create_complete_orion_app
 
 @pytest.mark.asyncio
 async def test_status_and_inference():
