@@ -14,6 +14,18 @@ try:  # pragma: no cover - optional router
 except Exception:  # pragma: no cover - missing deps
     RECURSIVE_ROUTER_AVAILABLE = False
 
+# MIH-IIE v2.0 routers
+try:
+    from orion_api.routers import (
+        e8_operations,
+        majorana_operations,
+        frame_invariant_validation,
+        holographic_inference
+    )
+    V2_ROUTERS_AVAILABLE = True
+except Exception:
+    V2_ROUTERS_AVAILABLE = False
+
 # MIH-IIE imports (new structure)
 try:
     from mih_iie.core.stability_core import stability_core
@@ -89,15 +101,34 @@ app.include_router(manifold_router.router, prefix="/manifold", tags=["Manifold R
 app.include_router(knowledge_expansion.router, prefix="/api/v1/knowledge", tags=["Knowledge Expansion"])
 app.include_router(perception.router, prefix="/api/v1/perception", tags=["Perception"])
 
+# Include v2.0 routers if available
+if V2_ROUTERS_AVAILABLE:
+    app.include_router(e8_operations.router)
+    app.include_router(majorana_operations.router)
+    app.include_router(frame_invariant_validation.router)
+    app.include_router(holographic_inference.router)
+
 @app.get("/")
 async def root():
-    return {
+    version = "v2.0" if V2_ROUTERS_AVAILABLE else ("v0.1.0-alpha" if MIH_IIE_AVAILABLE else "Legacy")
+
+    response = {
         "message": f"Welcome to {'MIH-IIE' if MIH_IIE_AVAILABLE else 'O.R.I.O.N. ∞'} API",
-        "architecture": "MIH-IIE v0.1.0-alpha" if MIH_IIE_AVAILABLE else "Legacy ORION",
+        "architecture": f"MIH-IIE {version}",
         "host": settings.host,
         "port": settings.port,
         "docs": "/docs",
     }
+
+    if V2_ROUTERS_AVAILABLE:
+        response["v2_features"] = {
+            "e8_topology": "/api/v2/e8",
+            "majorana_0d_seeds": "/api/v2/majorana",
+            "frame_invariant_validation": "/api/v2/frame-invariant",
+            "holographic_inference": "/api/v2/holographic"
+        }
+
+    return response
 
 
 @app.get("/architecture")
