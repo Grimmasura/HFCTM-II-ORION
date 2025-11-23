@@ -44,25 +44,51 @@ jobs:
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
+      - name: Verify Python Imports
+        run: |
+          echo "Verifying main module imports..."
+          python -c "
+          import sys
+          try:
+              from orion_api import main
+              print('✓ Main module imports successfully')
+              sys.exit(0)
+          except Exception as e:
+              print(f'✗ Import failed: {e}')
+              import traceback
+              traceback.print_exc()
+              sys.exit(1)
+          "
+
       - name: Start FastAPI Server
         run: |
+          echo "Starting Uvicorn server..."
           nohup uvicorn orion_api.main:app --host 0.0.0.0 --port 8080 > uvicorn.log 2>&1 &
-          sleep 5  # Give the server time to start
+          echo "Server PID: $!"
+          sleep 5  # Give the server initial time to start
 
       - name: Wait for API to Start
         run: |
-          echo "Waiting for FastAPI server..."
-          for i in {1..10}; do
+          echo "Waiting for FastAPI server to respond..."
+          for i in {1..20}; do
             if curl --silent --fail http://localhost:8080/docs > /dev/null 2>&1; then
-              echo "✓ API is responding"
+              echo "✓ API is responding on attempt $i"
+              echo "=== Server started successfully ==="
               exit 0
             fi
-            echo "Attempt $i/10: Retrying in 3 seconds..."
+            echo "Attempt $i/20: Server not ready yet, retrying in 3 seconds..."
             sleep 3
           done
-          echo "✗ API failed to start after 30 seconds"
+          echo "✗ API failed to start after 60 seconds"
+          echo ""
           echo "=== Uvicorn logs ==="
           cat uvicorn.log || echo "No logs available"
+          echo ""
+          echo "=== Process check ==="
+          ps aux | grep uvicorn || echo "No uvicorn process found"
+          echo ""
+          echo "=== Port check ==="
+          netstat -tuln | grep 8080 || echo "Port 8080 not listening"
           exit 1
 
       - name: Run Tests
