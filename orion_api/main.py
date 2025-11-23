@@ -2,7 +2,7 @@ from fastapi import FastAPI, Response
 
 # Optional orion_enhanced import
 try:
-    from orion_enhanced.orion_complete import create_complete_orion_app
+    from orion_api.enhanced.orion_complete import create_complete_orion_app
     ORION_ENHANCED_AVAILABLE = True
 except Exception as e:
     print(f"Warning: orion_enhanced not available: {e}")
@@ -44,7 +44,7 @@ except Exception:
 
 # MIH-IIE imports (new structure)
 try:
-    from mih_iie.core.stability_core import stability_core
+    from mih_iie.core.stability.stability_core import stability_core
     from mih_iie.layers.l5_governance import init_safety_core, safety_core, SafetyConfig
     MIH_IIE_AVAILABLE = True
 except ImportError:
