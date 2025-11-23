@@ -88,9 +88,9 @@ app = FastAPI(
 )
 app.mount("/enhanced", create_complete_orion_app())
 
-# Initialize safety core on startup
 @app.on_event("startup")
 async def startup_event():
+    """Temporary startup hook; replace with lifespan handler when refactoring."""
     print("=" * 50)
     print("MIH-IIE API Starting Up")
     print("=" * 50)
