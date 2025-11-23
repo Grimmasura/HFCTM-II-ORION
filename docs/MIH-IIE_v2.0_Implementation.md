@@ -121,6 +121,7 @@ Symmetry-preserving coordination protocols.
 **Usage**:
 ```python
 from models.e8_coordination import create_e8_coordination
+from mih_iie.layers.l2_majorana_array import compile_reflection_sequence, build_e8_coxeter_matrix
 
 # Create coordination protocol
 protocol = create_e8_coordination()
@@ -132,6 +133,11 @@ groups = protocol.schedule_operations(operations)
 # Verify coordination
 status = protocol.verify_coordination()
 print(f"Coordination active: {status['coordination_active']}")
+
+# Generate a normalized braid word over E8 simple reflections (s1..s8)
+coxeter = build_e8_coxeter_matrix()
+word = compile_reflection_sequence([1, 2, 1], coxeter=coxeter)
+print(f\"Normalized braid word: {word}\")
 ```
 
 ### Layer 5: Frame-Invariant EDS

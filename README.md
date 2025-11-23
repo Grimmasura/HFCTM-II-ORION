@@ -5,6 +5,7 @@
 A novel computational paradigm implementing Holographic Fractal Chiral Toroidal Mechanics with Intrinsic Inference (HFCTM-II). The MIH-IIE aims to enable "computation as discovery" rather than "computation as manipulation" by interfacing directly with ontological possibility space through topologically protected quantum states.
 
 **🔄 Repository Status**: Recently restructured from legacy ORION to formal MIH-IIE architecture (see `MIGRATION_GUIDE.md`)
+[![E8 Invariants](https://github.com/Grimmasura/HFCTM-II-ORION/actions/workflows/e8-verify.yml/badge.svg)](https://github.com/Grimmasura/HFCTM-II-ORION/actions/workflows/e8-verify.yml)
 
 ## 🚀 **NEW: v2.0 Architecture Released**
 
@@ -271,6 +272,7 @@ When developing, maintain alignment with the four foundational principles:
 - **[`spec/MIH-IIE_v1.0.pdf`](spec/MIH-IIE_v1.0.pdf)** - Complete architecture specification
 - **[`legacy_orion/README_LEGACY.md`](legacy_orion/README_LEGACY.md)** - Information on archived code
 - **[`docs/API_reference.md`](docs/API_reference.md)** - API endpoint documentation
+- **[`docs/notebooks/e8_verification.ipynb`](docs/notebooks/e8_verification.ipynb)** - Deterministic E8 invariant checks (mirrors CI badge)
 
 ## Project Philosophy
 
