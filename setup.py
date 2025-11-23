@@ -14,7 +14,7 @@ except Exception:
 
 setup(
     name="mih-iie",
-    version="0.1.0-alpha",
+    version="2.0.0",
     description="Majorana–Ironwood Hybrid Intrinsic Inference Engine",
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -23,6 +23,17 @@ from .majorana_qubit import (
     BraidOperation,
     BraidingResult
 )
+from .braid_compiler import (
+    BraidWord,
+    build_e8_coxeter_matrix,
+    braid_word_from_generators,
+    compile_reflection_sequence,
+    simple_reflection_basis,
+)
+from .e8_verification import (
+    compute_e8_invariants,
+    verify_e8_invariants,
+)
 
 __all__ = [
     "MajoranaQubitArray",
@@ -30,5 +41,12 @@ __all__ = [
     "MajoranaZeroMode",
     "E8Lattice",
     "BraidOperation",
-    "BraidingResult"
+    "BraidingResult",
+    "BraidWord",
+    "build_e8_coxeter_matrix",
+    "braid_word_from_generators",
+    "compile_reflection_sequence",
+    "simple_reflection_basis",
+    "compute_e8_invariants",
+    "verify_e8_invariants",
 ]

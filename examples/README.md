@@ -16,6 +16,7 @@ export PYTHONPATH=$PWD:$PYTHONPATH
 # Run examples
 python examples/chiral_inversion_demo.py
 python examples/egregore_defense_demo.py
+python examples/egregore_defense_three_frame_demo.py
 python examples/hfctm_compliance_demo.py
 python examples/multi_agent_coordinator_demo.py
 ```
@@ -64,7 +65,23 @@ Demonstrates **semantic drift protection** using the EgregoreDefenseSystem.
 
 ---
 
-### 3. HFCTM-II Compliance Demo (`hfctm_compliance_demo.py`)
+### 3. Three-Frame Egregore Defense Demo (`egregore_defense_three_frame_demo.py`)
+
+Runs three evaluators (forward, retro, atemporal) and emits convergence/corruption/shift scores in one pass.
+
+**Key Concepts**:
+- Uses semantic torsion thresholds to flag drift
+- Surfaces corrupted pattern similarity and quarantine decisions
+- Outputs JSON summary for quick inspection
+
+**Use Cases**:
+- Fast L5 governance smoke test
+- Demonstrating multi-frame agreement vs. corruption
+- Validating monitoring thresholds before deployment
+
+---
+
+### 4. HFCTM-II Compliance Demo (`hfctm_compliance_demo.py`)
 
 Demonstrates verification of the **four HFCTM-II principles**:
 
@@ -88,7 +105,7 @@ Demonstrates verification of the **four HFCTM-II principles**:
 
 ---
 
-### 4. Multi-Agent Coordinator Demo (`multi_agent_coordinator_demo.py`)
+### 5. Multi-Agent Coordinator Demo (`multi_agent_coordinator_demo.py`)
 
 Demonstrates **polychronic inference coordination** across four temporal modes:
 
