@@ -1,5 +1,21 @@
 from fastapi import FastAPI, Response
-from orion_enhanced.orion_complete import create_complete_orion_app
+
+# Optional orion_enhanced import
+try:
+    from orion_enhanced.orion_complete import create_complete_orion_app
+    ORION_ENHANCED_AVAILABLE = True
+except Exception as e:
+    print(f"Warning: orion_enhanced not available: {e}")
+    ORION_ENHANCED_AVAILABLE = False
+    def create_complete_orion_app():
+        """Fallback when orion_enhanced is unavailable."""
+        from fastapi import FastAPI
+        fallback_app = FastAPI(title="ORION Enhanced (Unavailable)")
+        @fallback_app.get("/")
+        async def fallback_root():
+            return {"error": "ORION Enhanced not available"}
+        return fallback_app
+
 from orion_api.routers import (
     quantum_sync,
     recursive_trust,
@@ -75,8 +91,26 @@ app.mount("/enhanced", create_complete_orion_app())
 # Initialize safety core on startup
 @app.on_event("startup")
 async def startup_event():
-    config = SafetyConfig()
-    init_safety_core(config)
+    print("=" * 50)
+    print("MIH-IIE API Starting Up")
+    print("=" * 50)
+    try:
+        config = SafetyConfig()
+        init_safety_core(config)
+        print("✓ Safety core initialized")
+    except Exception as e:
+        print(f"✗ Safety core initialization failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+    print(f"✓ ORION Enhanced: {'Available' if ORION_ENHANCED_AVAILABLE else 'Unavailable (using fallback)'}")
+    print(f"✓ V2 Routers: {'Available' if V2_ROUTERS_AVAILABLE else 'Unavailable'}")
+    print(f"✓ Recursive AI: {'Available' if RECURSIVE_ROUTER_AVAILABLE else 'Unavailable'}")
+    print(f"✓ MIH-IIE Structure: {'Available' if MIH_IIE_AVAILABLE else 'Using legacy imports'}")
+    print("=" * 50)
+    print(f"API ready at http://{settings.host}:{settings.port}")
+    print(f"Docs available at http://{settings.host}:{settings.port}/docs")
+    print("=" * 50)
 
 # Safety middleware
 @app.middleware("http")
