@@ -1,82 +1,116 @@
 """
-MIH-IIE v2.1 Reference Implementations
+MIH-IIE v2.1 spec-aligned modules.
 
-This module contains the official v2.1 reference implementations
-from the MIH-IIE specification.
-
-Key improvements over v2.0:
-- Integer-scaled E8 representation for numerical stability
-- Immutable dataclasses with frozen=True
-- Abstract backend interfaces
-- Explicit type hints
-- Pure functional algorithms where possible
-
-Reference: spec/mih_iie_v2_1_spec.pdf
+These files originate from the provided v2.1 spec bundle and are surfaced
+as a cohesive namespace for validation and integration work.
 """
 
-__version__ = "2.1.0"
-
-# Fix relative imports in reference implementations
-import sys
-from pathlib import Path
-
-# Make imports work correctly
-_module_path = Path(__file__).parent
-sys.path.insert(0, str(_module_path))
-
-try:
-    from .e8 import E8, Vector, RootTuple
-    from .coordination import (
-        BellPair,
-        MajoranaZeroMode,
-        EntanglementRegistry,
-        QuantumBackend,
-    )
-    from .eds import (
-        FrameResult,
-        ValidationState,
-        SystemState,
-        ConvergenceEvaluator,
-    )
-    from .holography import (
-        BoundaryMeasurement,
-        TensorNode,
-        TensorNetwork,
-        identify_boundary,
-    )
-    from .error_correction import (
-        Stabilizer,
-        Syndrome,
-        ErrorLocation,
-        CorrectionResult,
-        construct_stabilizers,
-    )
-
-    V2_1_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: v2.1 imports failed: {e}")
-    V2_1_AVAILABLE = False
+from .e8 import E8, _normalize_int_vec, _dot_scaled  # noqa: F401
+from .coordination import (  # noqa: F401
+    BellPair,
+    EntanglementRegistry,
+    MajoranaZeroMode,
+    SimulatedBackend,
+    establish_e8_network,
+    initialize_0d_seed_array,
+    verify_symmetry,
+    find_independent_operations,
+    schedule_braiding_sequence,
+    establish_synchronization,
+    TemporalMode,
+)
+from .eds import (  # noqa: F401
+    FrameResult,
+    ValidationState,
+    SystemState,
+    ConvergenceEvaluator,
+    corruption_score,
+    paradigm_shift_score,
+    validate_frame_invariance,
+    detect_state,
+    detect_obfuscation,
+    autonomous_correction_protocol,
+    run_frames,
+    FrameInvariantEDS,
+    get_default_frames,
+)
+from .error_correction import (  # noqa: F401
+    Stabilizer,
+    Syndrome,
+    ErrorLocation,
+    CorrectionResult,
+    construct_stabilizers,
+    construct_stabilizers_for_subgraph,
+    SyndromeMeasurer,
+    MinimumWeightDecoder,
+    error_correction_cycle,
+    ErrorMonitor,
+    ErrorStatistics,
+)
+from .holography import (  # noqa: F401
+    BoundaryMeasurement,
+    TensorNode,
+    TensorNetwork,
+    identify_boundary,
+    measure_boundary,
+    build_e8_tensor_network,
+    reconstruct_bulk,
+    compute_inference,
+    HolographicStateProjector,
+    boundary_measurements_to_dict,
+    reconstruct_bulk_from_boundary,
+    optimize_contraction_order,
+)
 
 __all__ = [
     "E8",
-    "Vector",
-    "RootTuple",
+    "_normalize_int_vec",
+    "_dot_scaled",
     "BellPair",
-    "MajoranaZeroMode",
     "EntanglementRegistry",
-    "QuantumBackend",
+    "MajoranaZeroMode",
+    "SimulatedBackend",
+    "establish_e8_network",
+    "initialize_0d_seed_array",
+    "verify_symmetry",
+    "find_independent_operations",
+    "schedule_braiding_sequence",
+    "establish_synchronization",
+    "TemporalMode",
     "FrameResult",
     "ValidationState",
     "SystemState",
     "ConvergenceEvaluator",
-    "BoundaryMeasurement",
-    "TensorNode",
-    "TensorNetwork",
-    "identify_boundary",
+    "validate_frame_invariance",
+    "detect_state",
+    "detect_obfuscation",
+    "autonomous_correction_protocol",
+    "run_frames",
+    "FrameInvariantEDS",
+    "get_default_frames",
+    "corruption_score",
+    "paradigm_shift_score",
     "Stabilizer",
     "Syndrome",
     "ErrorLocation",
     "CorrectionResult",
     "construct_stabilizers",
-    "V2_1_AVAILABLE",
+    "construct_stabilizers_for_subgraph",
+    "SyndromeMeasurer",
+    "MinimumWeightDecoder",
+    "error_correction_cycle",
+    "ErrorMonitor",
+    "ErrorStatistics",
+    "BoundaryMeasurement",
+    "TensorNode",
+    "TensorNetwork",
+    "identify_boundary",
+    "measure_boundary",
+    "build_e8_tensor_network",
+    "reconstruct_bulk",
+    "compute_inference",
+    "HolographicStateProjector",
+    "boundary_measurements_to_dict",
+    "reconstruct_bulk_from_boundary",
+    "optimize_contraction_order",
 ]

@@ -218,6 +218,20 @@ class ObservationalFrame(ABC):
         result = self.evaluate(state)
         return result.vector
 
+def _encode_proposition(proposition: Any, seed: int) -> np.ndarray:
+    """
+    Deterministic proposition embedding.
+
+    Uses a hash-based RNG seeded by a stable repr of the proposition to avoid
+    stochastic behavior while still producing diverse vectors across frames.
+    """
+    prop_str = repr(proposition)
+    composite_seed = abs(hash((prop_str, seed))) % (2**32)
+    rng = np.random.default_rng(composite_seed)
+    vec = rng.normal(size=8)
+    vec = vec / (np.linalg.norm(vec) + 1e-9)
+    return vec
+
 
 class QuantumMeasurementFrame(ObservationalFrame):
     """Frame based on quantum measurement outcomes."""
@@ -227,14 +241,12 @@ class QuantumMeasurementFrame(ObservationalFrame):
         return "quantum_measurement"
     
     def evaluate(self, proposition: Any) -> FrameResult:
-        # Placeholder: would interface with quantum backend
-        vec = np.random.randn(8)
-        vec = vec / (np.linalg.norm(vec) + 1e-9)
+        vec = _encode_proposition(proposition, seed=42)
         return FrameResult(
             name=self.name,
             vector=vec,
             confidence=0.95,
-            metadata={"basis": "computational"}
+            metadata={"basis": "computational", "seed": 42}
         )
 
 
@@ -246,14 +258,12 @@ class ClassicalPhysicsFrame(ObservationalFrame):
         return "classical_physics"
     
     def evaluate(self, proposition: Any) -> FrameResult:
-        # Placeholder: would compute classical physics prediction
-        vec = np.random.randn(8)
-        vec = vec / (np.linalg.norm(vec) + 1e-9)
+        vec = _encode_proposition(proposition, seed=7)
         return FrameResult(
             name=self.name,
             vector=vec,
             confidence=0.90,
-            metadata={"model": "newtonian"}
+            metadata={"model": "newtonian", "seed": 7}
         )
 
 
@@ -265,14 +275,12 @@ class TopologicalInvariantFrame(ObservationalFrame):
         return "topological_invariant"
     
     def evaluate(self, proposition: Any) -> FrameResult:
-        # Placeholder: would compute topological invariants
-        vec = np.random.randn(8)
-        vec = vec / (np.linalg.norm(vec) + 1e-9)
+        vec = _encode_proposition(proposition, seed=11)
         return FrameResult(
             name=self.name,
             vector=vec,
             confidence=0.99,
-            metadata={"invariant_type": "E8_weyl"}
+            metadata={"invariant_type": "E8_weyl", "seed": 11}
         )
 
 
@@ -284,14 +292,12 @@ class ReinforcementLearningFrame(ObservationalFrame):
         return "reinforcement_learning"
     
     def evaluate(self, proposition: Any) -> FrameResult:
-        # Placeholder: would compute RL value function
-        vec = np.random.randn(8)
-        vec = vec / (np.linalg.norm(vec) + 1e-9)
+        vec = _encode_proposition(proposition, seed=21)
         return FrameResult(
             name=self.name,
             vector=vec,
             confidence=0.80,
-            metadata={"algorithm": "ppo"}
+            metadata={"algorithm": "ppo", "seed": 21}
         )
 
 
@@ -303,14 +309,12 @@ class LinguisticSemanticFrame(ObservationalFrame):
         return "linguistic_semantic"
     
     def evaluate(self, proposition: Any) -> FrameResult:
-        # Placeholder: would compute semantic embedding
-        vec = np.random.randn(8)
-        vec = vec / (np.linalg.norm(vec) + 1e-9)
+        vec = _encode_proposition(proposition, seed=99)
         return FrameResult(
             name=self.name,
             vector=vec,
             confidence=0.85,
-            metadata={"embedding": "e8_projection"}
+            metadata={"embedding": "e8_projection", "seed": 99}
         )
 
 
@@ -370,6 +374,37 @@ def validate_frame_invariance(
     
     return state, convergence, frame_results
 
+
+class FrameInvariantEDS:
+    """
+    Convenience wrapper around frame-invariant validation and corruption checks.
+    Maintains baseline convergence to distinguish corruption vs. paradigm shift.
+    """
+
+    def __init__(
+        self,
+        frames: Optional[List[ObservationalFrame]] = None,
+        baseline_convergence: float = 0.9,
+        high_threshold: float = 0.95,
+        low_threshold: float = 0.30,
+    ):
+        self.frames = frames or get_default_frames()
+        self.baseline_convergence = baseline_convergence
+        self.high_threshold = high_threshold
+        self.low_threshold = low_threshold
+        self._prev_results: Optional[List[FrameResult]] = None
+
+    def evaluate(self, proposition: Any) -> Dict[str, Any]:
+        state, convergence, results = validate_frame_invariance(
+            proposition,
+            frames=self.frames,
+            high_threshold=self.high_threshold,
+            low_threshold=self.low_threshold,
+        )
+        detection = detect_state(self._prev_results, results)
+        self._prev_results = results
+        detection.update({"state": state, "convergence": convergence, "frames": results})
+        return detection
 
 # ==============================================================================
 # Algorithm 15: Detect Semantic Corruption

@@ -12,8 +12,8 @@ from typing import List, Tuple, Dict, Set, Optional
 from enum import Enum
 import numpy as np
 
-from models.v2_1.e8 import E8
-from models.v2_1.coordination import (
+from .e8 import E8
+from .coordination import (
     MajoranaZeroMode, EntanglementRegistry, QuantumBackend
 )
 
@@ -83,7 +83,8 @@ class CorrectionResult(Enum):
 
 def construct_stabilizers(
     e8: E8,
-    adjacency: Optional[np.ndarray] = None
+    adjacency: Optional[np.ndarray] = None,
+    limit: Optional[int] = None
 ) -> List[Stabilizer]:
     """
     Algorithm 8: Construct E8 Stabilizers
@@ -102,7 +103,7 @@ def construct_stabilizers(
         adjacency = e8.adjacency_matrix()
     
     # Find all 4-cliques using the E8 engine
-    cliques = e8.find_k_cliques(k=4, limit=None)
+    cliques = e8.find_k_cliques(k=4, limit=limit)
     
     # Convert to stabilizers (automatically deduplicated by set)
     stabilizers = set()
