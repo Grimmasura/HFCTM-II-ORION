@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, Optional
 
 from .schema import TelemetryEvent
@@ -68,7 +68,8 @@ class HashChainLogger:
             "model_version": model_version,
             "detector_metrics": detector_metrics,
             "action": action,
-            "timestamp": datetime.utcnow(),  # use naive UTC for compatibility
+            # timezone-aware UTC
+            "timestamp": datetime.now(tz=timezone.utc),
             "prev_hash": self.prev_hash,
         }
 
