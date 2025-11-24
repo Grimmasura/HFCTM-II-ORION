@@ -29,7 +29,8 @@ class TelemetryEvent(BaseModel):
         default=None, description="Hash of the current telemetry event"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "description": "Telemetry event schema matching Appendix P with tamper-evident fields."
         }
+    }

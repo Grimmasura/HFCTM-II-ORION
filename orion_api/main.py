@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Response
+from contextlib import asynccontextmanager
 
 # Optional orion_enhanced import
 try:
@@ -7,13 +8,15 @@ try:
 except Exception as e:
     print(f"Warning: orion_enhanced not available: {e}")
     ORION_ENHANCED_AVAILABLE = False
+
     def create_complete_orion_app():
         """Fallback when orion_enhanced is unavailable."""
-        from fastapi import FastAPI
         fallback_app = FastAPI(title="ORION Enhanced (Unavailable)")
+
         @fallback_app.get("/")
         async def fallback_root():
             return {"error": "ORION Enhanced not available"}
+
         return fallback_app
 
 from orion_api.routers import (
@@ -82,15 +85,11 @@ except Exception:  # pragma: no cover - import error handling
         return b""
 
 app_title = "MIH-IIE API" if MIH_IIE_AVAILABLE else "O.R.I.O.N. ∞ API (Legacy)"
-app = FastAPI(
-    title=app_title,
-    description="Majorana–Ironwood Hybrid Intrinsic Inference Engine" if MIH_IIE_AVAILABLE else "Omniversal Recursive Intelligence for Ontological Navigation"
-)
-app.mount("/enhanced", create_complete_orion_app())
 
-# Initialize safety core on startup
-@app.on_event("startup")
-async def startup_event():
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan handler to initialize safety core and log availability."""
     print("=" * 50)
     print("MIH-IIE API Starting Up")
     print("=" * 50)
@@ -111,6 +110,15 @@ async def startup_event():
     print(f"API ready at http://{settings.host}:{settings.port}")
     print(f"Docs available at http://{settings.host}:{settings.port}/docs")
     print("=" * 50)
+    yield
+
+
+app = FastAPI(
+    title=app_title,
+    description="Majorana–Ironwood Hybrid Intrinsic Inference Engine" if MIH_IIE_AVAILABLE else "Omniversal Recursive Intelligence for Ontological Navigation",
+    lifespan=lifespan,
+)
+app.mount("/enhanced", create_complete_orion_app())
 
 # Safety middleware
 @app.middleware("http")
