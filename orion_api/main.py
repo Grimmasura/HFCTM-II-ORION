@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Response
+from contextlib import asynccontextmanager
 
 # Optional orion_enhanced import
 try:
@@ -7,13 +8,15 @@ try:
 except Exception as e:
     print(f"Warning: orion_enhanced not available: {e}")
     ORION_ENHANCED_AVAILABLE = False
+
     def create_complete_orion_app():
         """Fallback when orion_enhanced is unavailable."""
-        from fastapi import FastAPI
         fallback_app = FastAPI(title="ORION Enhanced (Unavailable)")
+
         @fallback_app.get("/")
         async def fallback_root():
             return {"error": "ORION Enhanced not available"}
+
         return fallback_app
 
 from orion_api.routers import (
@@ -84,6 +87,7 @@ except Exception:  # pragma: no cover - import error handling
 app_title = "MIH-IIE API" if MIH_IIE_AVAILABLE else "O.R.I.O.N. ∞ API (Legacy)"
 
 
+@asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan handler to initialize safety core and log availability."""
     print("=" * 50)
