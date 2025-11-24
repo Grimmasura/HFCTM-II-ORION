@@ -275,6 +275,7 @@ When developing, maintain alignment with the four foundational principles:
 - **[`docs/notebooks/e8_verification.ipynb`](docs/notebooks/e8_verification.ipynb)** - Deterministic E8 invariant checks (mirrors CI badge)
 - **`models/v2_1/`** - v2.1 spec-aligned E8/coordination/EDS/error-correction/holography modules for validation
 - **`mcp/server.py`** - MCP-style FastAPI endpoints exposing E8 invariants, braids, EDS frames, stabilizers, and holography helpers
+- **[`docs/LMStudio_integration.md`](docs/LMStudio_integration.md)** - Configure LM Studio tools against the MCP server
 
 ## Project Philosophy
 

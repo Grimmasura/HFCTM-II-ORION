@@ -107,3 +107,14 @@ async def holography_infer(edge_limit: int = 8, percentile: float = 2.0) -> Dict
         "edge_limit": edge_limit,
         "bulk_shape": np.asarray(bulk).shape,
     }
+
+
+def main(host: str = "0.0.0.0", port: int = 8088):
+    """Run the MCP-style server."""
+    import uvicorn
+
+    uvicorn.run(app, host=host, port=port)
+
+
+if __name__ == "__main__":
+    main()
