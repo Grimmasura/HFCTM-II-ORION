@@ -14,10 +14,11 @@ The EDS monitors for:
 - Measurement corruption
 """
 
-from typing import Dict, List, Set, Tuple, Optional
+from typing import Dict, List, Set, Tuple, Optional, Any
 from dataclasses import dataclass
 from collections import defaultdict
 import numpy as np
+from numpy.typing import ArrayLike
 
 
 @dataclass
@@ -37,6 +38,19 @@ class CorruptedPattern:
     severity: float  # 0.0 to 1.0
 
 
+@dataclass
+class EgregoreMarkers:
+    """Empirical markers aligned to the six-criterion definition."""
+    distributed_representation: float
+    feedback_loops: float
+    persistence: float
+    decentralized_agency: float
+    behavioral_causality: float
+    semantic_topology: float
+    qualifies: bool
+    notes: Dict[str, Any]
+
+
 class EgregoreDefenseSystem:
     """
     Egregore Defense System for protecting against semantic drift and
@@ -52,7 +66,8 @@ class EgregoreDefenseSystem:
         self,
         torsion_threshold_sigma: float = 3.0,
         similarity_threshold: float = 0.80,
-        baseline_checkpoint_interval: int = 1000
+        baseline_checkpoint_interval: int = 1000,
+        marker_threshold: float = 0.6,
     ):
         """
         Initialize Egregore Defense System.
@@ -65,6 +80,7 @@ class EgregoreDefenseSystem:
         self.torsion_threshold_sigma = torsion_threshold_sigma
         self.similarity_threshold = similarity_threshold
         self.checkpoint_interval = baseline_checkpoint_interval
+        self.marker_threshold = marker_threshold
 
         # Semantic field tracking
         self.semantic_history: List[SemanticState] = []
@@ -246,10 +262,118 @@ class EgregoreDefenseSystem:
         # Combined similarity
         return (key_similarity + value_similarity) / 2.0
 
+    def _pairwise_correlation(self, matrix: np.ndarray) -> float:
+        """Mean absolute pairwise Pearson correlation of rows; guards shape issues."""
+        if matrix.ndim != 2 or matrix.shape[0] < 2:
+            return 0.0
+        cov = np.corrcoef(matrix)
+        # Remove diagonal, take absolute mean
+        mask = ~np.eye(cov.shape[0], dtype=bool)
+        vals = np.abs(cov[mask])
+        return float(np.mean(vals)) if vals.size else 0.0
+
+    def assess_empirical_egregore(
+        self,
+        *,
+        belief_matrix: Optional[ArrayLike] = None,
+        interaction_matrix: Optional[ArrayLike] = None,
+        retention_curve: Optional[ArrayLike] = None,
+        outcome_coherence: Optional[float] = None,
+        behavior_matrix: Optional[ArrayLike] = None,
+        semantic_embeddings: Optional[ArrayLike] = None,
+    ) -> EgregoreMarkers:
+        """
+        Compute empirical markers for egregore detection per six measurable criteria.
+
+        Args:
+            belief_matrix: Individuals × beliefs/features (intersubjective correlation)
+            interaction_matrix: Adjacency/weight matrix for feedback/agency
+            retention_curve: Sequence of participation/belief retention over time
+            outcome_coherence: Scalar 0–1 of outcome alignment/coherence
+            behavior_matrix: Individuals × behaviors for behavioral causality
+            semantic_embeddings: Tokens/terms × embedding dim for semantic topology
+        """
+        notes: Dict[str, Any] = {}
+
+        # 1) Distributed representation: high intersubjective correlation
+        dist_repr = self._pairwise_correlation(np.asarray(belief_matrix)) if belief_matrix is not None else 0.0
+
+        # 2) Self-reinforcing feedback: network density/clustering proxy
+        feedback = 0.0
+        if interaction_matrix is not None:
+            A = np.asarray(interaction_matrix, dtype=float)
+            n = A.shape[0]
+            if n > 1:
+                density = np.sum(A) / (n * (n - 1) + 1e-9)
+                # simple feedback proxy: density times mean degree normalized
+                deg = np.mean(np.sum(A, axis=1))
+                feedback = float(np.clip(density * (deg / max(np.max(A), 1e-9)), 0.0, 1.0))
+                notes["mean_degree"] = float(deg)
+
+        # 3) Persistence: survival of patterns over turnover
+        persistence = 0.0
+        if retention_curve is not None:
+            arr = np.asarray(retention_curve, dtype=float)
+            if arr.size > 1 and arr[0] != 0:
+                persistence = float(np.clip(arr[-1] / (arr[0] + 1e-9), 0.0, 1.0))
+                notes["retention_start"] = float(arr[0])
+                notes["retention_end"] = float(arr[-1])
+
+        # 4) Agency without central agent: decentralized signal
+        decentralized_agency = 0.0
+        if interaction_matrix is not None:
+            A = np.asarray(interaction_matrix, dtype=float)
+            deg = np.sum(A, axis=1)
+            if deg.size > 0:
+                normalized = deg / (np.sum(deg) + 1e-9)
+                entropy = -np.sum(normalized * np.log(normalized + 1e-9))
+                entropy_norm = entropy / (np.log(len(deg)) + 1e-9)
+                decentralized_agency = float(np.clip(entropy_norm * (outcome_coherence or 0.5), 0.0, 1.0))
+                notes["degree_entropy"] = float(entropy_norm)
+
+        # 5) Behavioral causality: predictable patterns across members
+        behavioral_causality = self._pairwise_correlation(np.asarray(behavior_matrix)) if behavior_matrix is not None else 0.0
+
+        # 6) Semantic topology: alignment/drift in embedding space
+        semantic_topology = 0.0
+        if semantic_embeddings is not None:
+            emb = np.asarray(semantic_embeddings, dtype=float)
+            semantic_topology = self._pairwise_correlation(emb)
+
+        thresholds = {
+            "distributed_representation": self.marker_threshold,
+            "feedback_loops": self.marker_threshold,
+            "persistence": self.marker_threshold,
+            "decentralized_agency": self.marker_threshold,
+            "behavioral_causality": self.marker_threshold,
+            "semantic_topology": self.marker_threshold,
+        }
+
+        qualifies = all([
+            dist_repr >= thresholds["distributed_representation"],
+            feedback >= thresholds["feedback_loops"],
+            persistence >= thresholds["persistence"],
+            decentralized_agency >= thresholds["decentralized_agency"],
+            behavioral_causality >= thresholds["behavioral_causality"],
+            semantic_topology >= thresholds["semantic_topology"],
+        ])
+
+        return EgregoreMarkers(
+            distributed_representation=dist_repr,
+            feedback_loops=feedback,
+            persistence=persistence,
+            decentralized_agency=decentralized_agency,
+            behavioral_causality=behavioral_causality,
+            semantic_topology=semantic_topology,
+            qualifies=qualifies,
+            notes=notes,
+        )
+
     def safety_check(
         self,
         semantic_field: Dict[str, str],
-        inference_structure: Optional[Dict[str, any]] = None
+        inference_structure: Optional[Dict[str, any]] = None,
+        egregore_observations: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, any]:
         """
         Execute complete egregore defense safety check.
@@ -257,6 +381,7 @@ class EgregoreDefenseSystem:
         Args:
             semantic_field: Current symbol→meaning mappings
             inference_structure: Current inference structure (optional)
+            egregore_observations: Optional empirical inputs for egregore marker assessment
 
         Returns:
             Safety check results with alerts and recommended actions
@@ -300,6 +425,20 @@ class EgregoreDefenseSystem:
                     should_quarantine = True
                     self.quarantines_issued += 1
 
+        # 3. Empirical egregore markers (optional)
+        markers: Optional[EgregoreMarkers] = None
+        if egregore_observations:
+            markers = self.assess_empirical_egregore(**egregore_observations)
+            if markers.qualifies:
+                alerts.append({
+                    "type": "egregore_detected",
+                    "severity": "critical",
+                    "markers": markers,
+                    "message": "All empirical egregore criteria satisfied"
+                })
+                should_quarantine = True
+                self.quarantines_issued += 1
+
         # Update semantic history
         current_state = SemanticState(
             timestamp=self.total_checks,
@@ -318,7 +457,8 @@ class EgregoreDefenseSystem:
             "alerts": alerts,
             "torsion": torsion,
             "total_checks": self.total_checks,
-            "statistics": self.get_statistics()
+            "statistics": self.get_statistics(),
+            "markers": markers,
         }
 
     def _update_baseline(self):
