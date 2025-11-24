@@ -68,8 +68,7 @@ class HashChainLogger:
             "model_version": model_version,
             "detector_metrics": detector_metrics,
             "action": action,
-            # TODO: replace with timezone-aware UTC when minimum Python version allows datetime.UTC
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.utcnow(),  # use naive UTC for compatibility
             "prev_hash": self.prev_hash,
         }
 
