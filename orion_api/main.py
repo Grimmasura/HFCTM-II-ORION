@@ -82,15 +82,10 @@ except Exception:  # pragma: no cover - import error handling
         return b""
 
 app_title = "MIH-IIE API" if MIH_IIE_AVAILABLE else "O.R.I.O.N. ∞ API (Legacy)"
-app = FastAPI(
-    title=app_title,
-    description="Majorana–Ironwood Hybrid Intrinsic Inference Engine" if MIH_IIE_AVAILABLE else "Omniversal Recursive Intelligence for Ontological Navigation"
-)
-app.mount("/enhanced", create_complete_orion_app())
 
-@app.on_event("startup")
-async def startup_event():
-    """Temporary startup hook; replace with lifespan handler when refactoring."""
+
+async def lifespan(app: FastAPI):
+    """Lifespan handler to initialize safety core and log availability."""
     print("=" * 50)
     print("MIH-IIE API Starting Up")
     print("=" * 50)
@@ -111,6 +106,15 @@ async def startup_event():
     print(f"API ready at http://{settings.host}:{settings.port}")
     print(f"Docs available at http://{settings.host}:{settings.port}/docs")
     print("=" * 50)
+    yield
+
+
+app = FastAPI(
+    title=app_title,
+    description="Majorana–Ironwood Hybrid Intrinsic Inference Engine" if MIH_IIE_AVAILABLE else "Omniversal Recursive Intelligence for Ontological Navigation",
+    lifespan=lifespan,
+)
+app.mount("/enhanced", create_complete_orion_app())
 
 # Safety middleware
 @app.middleware("http")
